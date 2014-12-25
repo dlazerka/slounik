@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+	<application>lazerka-slounik</application>
+	<version>18-handheld</version>
+
+	<!-- Configure serving/caching of GWT files -->
+	<static-files>
+		<include path="/**.html" expiration="1d" />
+		<include path="/**.js" expiration="1d" />
+		<include path="/**.css" expiration="1d" />
+		<include path="/**.ico" expiration="7d" />
+	</static-files>
+
+	<resource-files>
+	</resource-files>
+
+	<admin-console>
+		<page name="My Admin" url="/" />
+	</admin-console>
+
+	<!-- Configure java.util.logging -->
+	<system-properties>
+		<property name="java.util.logging.config.file" value="WEB-INF/logging.properties" />
+	</system-properties>
+
+	<!-- Commented because Eclipse Google Plugin does not understand -->
+	<threadsafe>true</threadsafe>
+
+</appengine-web-app>
