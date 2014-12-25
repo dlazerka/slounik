@@ -1,6 +1,5 @@
 package name.dlazerka.slounik.admin.parser;
 
-import com.google.appengine.api.datastore.*;
 import com.google.appengine.tools.mapreduce.Context;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

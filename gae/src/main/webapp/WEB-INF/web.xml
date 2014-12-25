@@ -65,6 +65,54 @@
 		<welcome-file>slounik.html</welcome-file>
 	</welcome-file-list>
 
+
+	<listener>
+		<listener-class>me.lazerka.slounik.gae.web.ServletContextListener</listener-class>
+	</listener>
+
+	<filter>
+		<filter-name>BypassGuiceFilter</filter-name>
+		<filter-class>me.lazerka.slounik.gae.web.BypassGuiceFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>BypassGuiceFilter</filter-name>
+		<url-pattern>*</url-pattern>
+	</filter-mapping>
+	<!-- Needed for Dev mode UploadBlobServlet which forwards to a servlet handled by Guice. -->
+	<filter-mapping>
+		<filter-name>BypassGuiceFilter</filter-name>
+		<url-pattern>*</url-pattern>
+		<dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>ALL</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<!-- anyone
+				<auth-constraint>
+					<role-name>admin</role-name>
+				</auth-constraint>
+		-->
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>cron</web-resource-name>
+			<url-pattern>/cron/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>admin</role-name>
+		</auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Admin area</web-resource-name>
