@@ -7,6 +7,7 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.cmd.LoadType;
 import com.googlecode.objectify.cmd.SimpleQuery;
+import me.lazerka.slounik.gae.rest.Lang;
 
 import java.util.List;
 
@@ -14,7 +15,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * TODO: Consists only of key for faster/cheaper lookups.
+ * Main entity of words storage, optimized for searching.
+ *
+ * Holds logic for `key`, no other class should know the format of `key`.
  *
  * @author Dzmitry Lazerka
  */
@@ -47,16 +50,17 @@ public class Entry {
 
 	/**
 	 * Holds logic for key construction.
-	 * If `query` ends on ` `, then adds full-match filter. Otherwise adds prefix-match filter.
 	 */
-	public static SimpleQuery<Entry> addFilter(String query, LoadType<Entry> type, String langFrom) {
-		if (query.endsWith(" ")) {
-			query = query.substring(0, query.length() - 1);
-			return type.filterKey("= " + langFrom + ":" + query + ARROWS);
-		}
+	public static SimpleQuery<Entry> addFullMatchFilter(String query, Lang from, LoadType<Entry> type) {
+		checkArgument(query.indexOf(ARROWS) == -1, query);
+		return addPrefixMatchFilter(query + ARROWS, from, type);
+	}
+
+	public static SimpleQuery<Entry> addPrefixMatchFilter(String query, Lang from, LoadType<Entry> type) {
+		String fromS = from.name().toLowerCase();
 		return type
-				.filterKey(">= " + langFrom + ":" + query)
-				.filterKey("< " + langFrom + ":" + query + Character.MAX_VALUE);
+				.filterKey(">=", Key.create(Entry.class, fromS + ':' + query))
+				.filterKey("<", Key.create(Entry.class, fromS + ':' + query + Character.MAX_VALUE));
 	}
 
 	private String getKeyPart(int index) {
@@ -66,16 +70,16 @@ public class Entry {
 		return split.get(index % 2);
 	}
 
-	public String getLangFrom() {
-		return getKeyPart(0);
+	public Lang getLangFrom() {
+		return Lang.valueOf(getKeyPart(0).toUpperCase());
 	}
 
 	public String getLemmaFrom() {
 		return getKeyPart(1);
 	}
 
-	public String getLangTo() {
-		return getKeyPart(2);
+	public Lang getLangTo() {
+		return Lang.valueOf(getKeyPart(2).toUpperCase());
 	}
 
 	public String getLemmaTo() {

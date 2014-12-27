@@ -5,7 +5,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
-	<servlet>
+	<!--<servlet>
 		<servlet-name>SearchServlet</servlet-name>
 		<servlet-class>name.dlazerka.slounik.SearchServlet</servlet-class>
 	</servlet>
@@ -48,7 +48,7 @@
 	<servlet-mapping>
 		<servlet-name>DBServlet</servlet-name>
 		<url-pattern>/admin/db/*</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping>-->
 
 <!--
 	<servlet>
@@ -90,11 +90,6 @@
 			<web-resource-name>ALL</web-resource-name>
 			<url-pattern>/*</url-pattern>
 		</web-resource-collection>
-		<!-- anyone
-				<auth-constraint>
-					<role-name>admin</role-name>
-				</auth-constraint>
-		-->
 		<user-data-constraint>
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>

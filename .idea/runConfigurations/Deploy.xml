@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Deploy" type="google-app-engine-deploy" factoryName="Google App Engine Deployment" singleton="true" server-name="Google App Engine">
-    <deployment type="artifact" name="gae:war exploded" />
+    <deployment type="artifact" name="gae_local" />
     <RunnerSettings RunnerId="DeployToServer" />
     <ConfigurationWrapper RunnerId="DeployToServer" />
     <method>
       <option name="BuildArtifacts" enabled="true">
-        <artifact name="gae:war exploded" />
+        <artifact name="gae_local" />
       </option>
     </method>
   </configuration>

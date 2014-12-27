@@ -18,16 +18,18 @@
 	<properties>
 		<appengine.app.version>1</appengine.app.version>
 		<gae.version>1.9.15</gae.version>
-		<jersey.version>1.18.2</jersey.version>
+		<jersey.version>1.18.3</jersey.version>
 		<jackson.version>2.4.4</jackson.version>
 	</properties>
 
 	<dependencies>
+<!--
 		<dependency>
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
 			<version>2.11.4</version>
 		</dependency>
+-->
 
 		<!-- App Engine -->
 		<dependency>
@@ -35,12 +37,14 @@
 			<artifactId>appengine-api-1.0-sdk</artifactId>
 			<version>${gae.version}</version>
 		</dependency>
+<!--
 
 		<dependency>
 			<groupId>com.google.appengine.tools</groupId>
 			<artifactId>appengine-mapreduce</artifactId>
 			<version>RELEASE</version>
 		</dependency>
+-->
 
 <!--
 		<dependency>
@@ -51,6 +55,7 @@
 -->
 
 
+<!--
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -73,6 +78,7 @@
 			</exclusions>
 		</dependency>
 
+-->
 
 		<!-- Uncomment to download SDK.
 		<dependency>
@@ -91,22 +97,11 @@
 			<version>2.5</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.google.inject.extensions</groupId>
-			<artifactId>guice-servlet</artifactId>
-			<version>3.0</version>
-		</dependency>
 
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
 			<version>${jersey.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-			<version>1.1.1</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
@@ -153,6 +148,16 @@
 			<artifactId>guice</artifactId>
 			<version>4.0-beta5</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.inject.extensions</groupId>
+			<artifactId>guice-servlet</artifactId>
+			<version>4.0-beta5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>18.0</version>
+		</dependency>
 
 		<!-- Logging -->
 		<dependency>
@@ -160,18 +165,18 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.9</version>
 		</dependency>
+		<dependency> <!-- Redirect to JUL, because GAE. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.7.9</version>
+		</dependency>
+<!--
 		<dependency>
 			<groupId>com.typesafe.scala-logging</groupId>
 			<artifactId>scala-logging_2.11</artifactId>
 			<version>3.1.0</version>
 		</dependency>
-
-		<!-- Redirect to JUL. -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
-			<version>1.7.9</version>
-		</dependency>
+-->
 
 		<!-- Testing -->
 		<dependency>

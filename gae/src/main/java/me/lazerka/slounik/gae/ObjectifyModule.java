@@ -25,8 +25,8 @@ public class ObjectifyModule extends AbstractModule {
 		// From Objectify docs: example for setting up @Transact annotation (DIY).
 		//bindInterceptor(Matchers.any(), Matchers.annotatedWith(Transact.class), new TransactInterceptor());
 
-//		TODO
-//		factory.register(Entry.class);
+		factory.register(Entry.class);
+		factory.register(Dictionary.class);
 
 		logger.debug("Objectify set up.");
 	}

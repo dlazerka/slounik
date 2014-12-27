@@ -1,27 +1,31 @@
 package me.lazerka.slounik.gae.rest;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 /**
  * @author Dzmitry Lazerka
  */
 public class EntryBean {
-	@JsonProperty
-	String lemmaFrom;
+	private final Map<Lang, String> lemmas;
 
 	@JsonProperty
-	String lemmaTo;
+	private final String dictName;
 
-	@JsonProperty
-	String langFrom;
-
-	@JsonProperty
-	String langTo;
-
-	public EntryBean(String lemmaFrom, String lemmaTo, String langFrom, String langTo) {
-		this.lemmaFrom = lemmaFrom;
-		this.lemmaTo = lemmaTo;
-		this.langFrom = langFrom;
-		this.langTo = langTo;
+	public EntryBean(String lemmaFrom, String lemmaTo, Lang from, Lang to, String dictName) {
+		lemmas = new EnumMap<>(Lang.class);
+		lemmas.put(from, lemmaFrom);
+		lemmas.put(to, lemmaTo);
+		this.dictName = dictName;
 	}
+
+@JsonAnyGetter
+@JsonSerialize(keyUsing = Lang.LangSerializer.class)
+public Map<Lang, String> getLemmas() {
+	return lemmas;
+}
 }

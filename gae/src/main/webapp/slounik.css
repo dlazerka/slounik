@@ -16,29 +16,37 @@ html, body {
 	border: 1px black solid;
 	width: 90%;
 }
-.left, .right {
-	max-width: 47%;
-	min-width: 13ex;
-	display: inline-block;
-}
-.left {
-	text-align: right;
-}
-.right {
-	text-align: left;
-}
-.arrows {
-	display: inline-block;
+
+.results {
 	margin: 0 auto;
 }
-.label {
+.results th {
 	color: gray;
 }
+
+.results .left,
+.results .right {
+	max-width: 47%;
+	min-width: 13ex;
+}
+.results .left {
+	text-align: right;
+}
+.results .right {
+	text-align: left;
+}
+.results .arrows {
+	margin: 0 auto;
+}
+.results .match {
+	text-decoration: underline;
+}
+
 .words .query {
 	text-decoration: underline;
 }
-.noResults {
-	color: red;
+.no-results {
+	color: #dd0000;
 }
 @media screen and (min-width: 40ex) {
 	* {

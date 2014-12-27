@@ -14,7 +14,7 @@
 							<include>jquery-1.6.4.min.js</include>
 							<include>slounik.css</include>
 							<include>slounik.html</include>
-							<include>slounik.js</include>
+							<include>slounik_old.js</include>
 							<include>key.pem</include>
 					</includes>
 					<directory>src/main/webapp</directory>

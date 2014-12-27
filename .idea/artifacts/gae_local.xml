@@ -1,0 +1,38 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="gae_local">
+    <output-path>$PROJECT_DIR$/target/gae_local</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="gae" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="AppEngine API" />
+          <element id="library" level="project" name="Maven: aopalliance:aopalliance:1.0" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.4.0" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.4.4" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.4.4" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-joda:2.4.4" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.4.4" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.4.4" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.4.4" />
+          <element id="library" level="project" name="Maven: com.google.appengine:appengine-api-1.0-sdk:1.9.15" />
+          <element id="library" level="project" name="Maven: com.google.guava:guava:18.0" />
+          <element id="library" level="project" name="Maven: com.google.inject.extensions:guice-servlet:4.0-beta5" />
+          <element id="library" level="project" name="Maven: com.google.inject:guice:4.0-beta5" />
+          <element id="library" level="project" name="Maven: com.googlecode.objectify:objectify:5.1.3" />
+          <element id="library" level="project" name="Maven: javax.inject:javax.inject:1" />
+          <element id="library" level="project" name="Maven: joda-time:joda-time:2.2" />
+          <element id="library" level="project" name="Maven: org.json:json:20090211" />
+          <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.7.9" />
+          <element id="library" level="project" name="Maven: org.slf4j:slf4j-jdk14:1.7.9" />
+          <element id="library" level="project" name="Maven: com.sun.jersey.contribs:jersey-guice:1.18.3" />
+          <element id="library" level="project" name="Maven: com.sun.jersey:jersey-core:1.18.3" />
+          <element id="library" level="project" name="Maven: com.sun.jersey:jersey-server:1.18.3" />
+          <element id="library" level="project" name="Maven: com.sun.jersey:jersey-servlet:1.18.3" />
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="gae/web/Web" />
+    </root>
+  </artifact>
+</component>

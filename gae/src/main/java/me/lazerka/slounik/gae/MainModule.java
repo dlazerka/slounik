@@ -36,7 +36,8 @@ public class MainModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		DateTimeZone.setDefault(DateTimeZone.UTC);
+		// Nota available due to access restrictions on GAE.
+		// DateTimeZone.setDefault(DateTimeZone.UTC);
 
 		install(new WebModule());
 

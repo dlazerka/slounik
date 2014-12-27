@@ -1,8 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="localhost:8580" type="GoogleAppEngineDevServer" factoryName="Local" APPLICATION_SERVER_NAME="AppEngine Dev 1.9.15" ALTERNATIVE_JRE_ENABLED="false" ALTERNATIVE_JRE_PATH="">
+  <configuration default="false" name="localhost:8580" type="GoogleAppEngineDevServer" factoryName="Local" APPLICATION_SERVER_NAME="AppEngine Dev 1.9.17" ALTERNATIVE_JRE_ENABLED="false" ALTERNATIVE_JRE_PATH="">
     <option name="OPEN_IN_BROWSER" value="false" />
+    <option name="UPDATE_ON_FRAME_DEACTIVATION" value="true" />
+    <option name="SHOW_DIALOG_ON_UPDATE" value="false" />
     <server-settings>
-      <option name="artifact" value="gae:war exploded" />
+      <option name="artifact" value="gae_local" />
       <option name="port" value="8580" />
     </server-settings>
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
@@ -44,7 +46,7 @@
     </ConfigurationWrapper>
     <method>
       <option name="BuildArtifacts" enabled="true">
-        <artifact name="gae:war exploded" />
+        <artifact name="gae_local" />
       </option>
     </method>
   </configuration>
