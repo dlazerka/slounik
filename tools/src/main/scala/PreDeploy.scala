@@ -9,28 +9,24 @@ import scala.io.Source
  * Processes all .html files:
  * Searches for strings like
  * {{{
- * &lt;script src="lib/jquery.js" cdn="//googleapis.cdn.com/jquery.min.js"&gt;
+ * &lt;script src="lib/jquery.js" predeploy="//googleapis.cdn.com/jquery.min.js"&gt;
  * }}}
- * and replaces `src` with `cdn`.
+ * and replaces `src` with `predeploy`.
  *
  * @author Dzmitry Lazerka
  */
 object PreDeploy {
-	val cdnRegexp = """(src=)"([^"]+)"\s+cdn="([^"]+)"""".r
-
 	def main(args: Array[String]) {
 		val workingDir = new File(System.getProperty("user.dir"))
+		println("Traversing " + workingDir.getAbsolutePath)
 		traverse(workingDir)
 	}
 
 	def traverse(dir: File): Unit = {
 		val nodes = dir.listFiles()
 
-		var htmls = nodes.filter(node => node.isFile && node.getName.endsWith(".html"))
-		htmls.map(processHtml)
-		if(htmls.isEmpty) {
-			println("No htmls found in " + dir.getAbsolutePath)
-		}
+		nodes.filter(node => node.isFile && node.getName.endsWith(".html"))
+			.map(processHtml)
 
 		nodes.filter(_.isDirectory)
 			.map(traverse)
@@ -43,7 +39,9 @@ object PreDeploy {
 		val content = source.mkString
 		source.close()
 
-		var newContent = cdnRegexp.replaceAllIn(content, """$1"$3"""")
+		var newContent = """(src=)"([^"]+)"\s+predeploy="([^"]+)""""
+				.r
+				.replaceAllIn(content, """$1"$3"""")
 
 		newContent = processEtags(newContent, htmlFile)
 
@@ -63,11 +61,12 @@ object PreDeploy {
 	}
 
 	def processEtags(content: String, htmlFile: File): String = {
-		val regexp = """(src="([^"]+))\?predeploy-etag"""".r
 		val crc32 = new CRC32()
 
+		val regexp = """"([^"]+)\?crc=[^"]*"""".r
 		regexp.replaceAllIn(content, m => {
-			val srcFile = new File(htmlFile.getParent, m.group(2))
+			val path = m.group(1)
+			val srcFile = new File(htmlFile.getParent, path)
 			val srcIs = new FileInputStream(srcFile)
 
 			val bytes = try {
@@ -78,10 +77,9 @@ object PreDeploy {
 
 			crc32.reset()
 			crc32.update(bytes)
-			val crc = crc32.getValue
-			val etag = java.lang.Long.toString(crc, 32)
+			val crc = crc32.getValue // In range [0, 2^32].
 
-			m.group(1) + '?' + etag + '"'
+			'"' + path + "?crc=" + crc.toHexString + '"'
 		})
 	}
 }

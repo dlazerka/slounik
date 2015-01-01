@@ -5,10 +5,12 @@
 
 	<!-- Configure serving/caching of GWT files -->
 	<static-files>
-		<include path="/**.html" expiration="1d" />
-		<include path="/**.js" expiration="1d" />
-		<include path="/**.css" expiration="1d" />
-		<include path="favicon.ico" expiration="7d" />
+		<include path="index.html" expiration="1s"/> <!-- force reload each time -->
+		<!--<include path="/**.js" expiration="365d" /> &lt;!&ndash; PreDeploy script adds ETags &ndash;&gt;-->
+		<include path="/**.js" expiration="10m" /> <!-- PreDeploy script adds ETags -->
+		<!--<include path="/**.css" expiration="365d" /> &lt;!&ndash; PreDeploy script adds ETags &ndash;&gt;-->
+		<include path="/**.css" expiration="10m" /> <!-- PreDeploy script adds ETags -->
+		<include path="favicon.ico" expiration="1d" />
 	</static-files>
 
 	<resource-files>

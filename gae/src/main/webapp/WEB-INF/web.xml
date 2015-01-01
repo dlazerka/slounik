@@ -62,9 +62,8 @@
 
 -->
 	<welcome-file-list>
-		<welcome-file>slounik.html</welcome-file>
+		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
-
 
 	<listener>
 		<listener-class>me.lazerka.slounik.gae.web.ServletContextListener</listener-class>

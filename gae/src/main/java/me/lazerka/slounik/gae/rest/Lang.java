@@ -18,7 +18,7 @@ public enum Lang {
 	public static class LangSerializer extends JsonSerializer<Lang> {
 		@Override
 		public void serialize(Lang value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
-			jgen.writeString(value.name().toLowerCase(Locale.US));
+			jgen.writeFieldName(value.name().toLowerCase(Locale.US));
 		}
 	}
 }

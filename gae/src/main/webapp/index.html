@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html ng-csp>
 <head>
 	<title>Слоўнік</title>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -7,24 +7,32 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<title>Слоўнік</title>
 	<link rel="icon" type="image/png" href="/favicon.ico"/>
-	<link rel="stylesheet" type="text/css" href="slounik.css"/>
+	<link rel="stylesheet" type="text/css" href="slounik.css?crc=predeploy"/>
+	<style type="text/css">
+		[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak],
+		.ng-cloak, .x-ng-cloak,
+		.ng-hide:not(.ng-hide-animate) {
+			display: none !important;
+		}
+
+		ng\:form {
+			display: block;
+		}
+	</style>
 
 	<script type="text/javascript" src="lib/jquery-2.1.1.js"
-	        cdn="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
+	        predeploy="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
 	<script type="text/javascript" src="lib/angular-1.3.5.js"
-	        cdn="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js" defer></script>
+	        predeploy="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js" defer></script>
 
-	<script type="text/javascript" src="slounik.js?predeploy-etag"></script>
-	<style type="text/css">
-		.ng-cloak {display: none;}
-	</style>
+	<script type="text/javascript" src="slounik.js?crc=predeploy" defer></script>
 </head>
 
 <body class="ng-cloak" ng-app="me.lazerka.slounik">
 <div class="main" ng-controller="SlounikController">
 	<input type="text" class="input" maxlength="100" ng-model="input"/>
 
-	<table class="results" ng-show="{{results.length}}">
+	<table class="results" ng-show="found">
 		<tr>
 			<th class="left">бел</th>
 			<th></th>
@@ -41,7 +49,7 @@
 		</tr>
 	</table>
 
-	<div class="no-results" ng-show="{{!results.length}}">
+	<div class="no-results" ng-show="!found">
 		ня знойдзена
 	</div>
 </div>
