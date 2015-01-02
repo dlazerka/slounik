@@ -27,6 +27,7 @@
     </content>
     <orderEntry type="jdk" jdkName="1.7" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="scala-sdk-2.11.4" level="application" />
     <orderEntry type="library" name="Maven: com.google.appengine:appengine-api-1.0-sdk:1.9.15" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.servlet:servlet-api:2.5" level="project" />
     <orderEntry type="library" name="Maven: com.sun.jersey:jersey-server:1.18.3" level="project" />
@@ -54,7 +55,6 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-all:1.10.17" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.google.appengine:appengine-api-stubs:1.9.15" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.google.appengine:appengine-testing:1.9.15" level="project" />
-    <orderEntry type="library" name="Maven: org.json:json:20090211" level="project" />
   </component>
   <component name="WebModuleBuildComponent">
     <setting name="EXPLODED_URL" value="file://$MODULE_DIR$/target/gae" />

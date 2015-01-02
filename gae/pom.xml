@@ -13,7 +13,7 @@
 	<artifactId>gae</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>Slounik</name>
+	<name>Gae</name>
 
 	<properties>
 		<appengine.app.version>1</appengine.app.version>
@@ -23,13 +23,6 @@
 	</properties>
 
 	<dependencies>
-<!--
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<version>2.11.4</version>
-		</dependency>
--->
 
 		<!-- App Engine -->
 		<dependency>
@@ -37,58 +30,6 @@
 			<artifactId>appengine-api-1.0-sdk</artifactId>
 			<version>${gae.version}</version>
 		</dependency>
-<!--
-
-		<dependency>
-			<groupId>com.google.appengine.tools</groupId>
-			<artifactId>appengine-mapreduce</artifactId>
-			<version>RELEASE</version>
-		</dependency>
--->
-
-<!--
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-common</artifactId>
-			<version>2.5.1</version>
-		</dependency>
--->
-
-
-<!--
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>1.2.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
--->
-
-		<!-- Uncomment to download SDK.
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-java-sdk</artifactId>
-			<version>${appengine.target.version}</version>
-			<type>zip</type>
-			<scope>provided</scope>
-		</dependency>
-		-->
 
 		<!-- Web stack -->
 		<dependency>
@@ -170,14 +111,6 @@
 			<artifactId>slf4j-jdk14</artifactId>
 			<version>1.7.9</version>
 		</dependency>
-<!--
-		<dependency>
-			<groupId>com.typesafe.scala-logging</groupId>
-			<artifactId>scala-logging_2.11</artifactId>
-			<version>3.1.0</version>
-		</dependency>
--->
-
 		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -213,15 +146,6 @@
 			<version>${gae.version}</version>
 			<scope>test</scope>
 		</dependency>
-
-
-		<!-- To Remove -->
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20090211</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>

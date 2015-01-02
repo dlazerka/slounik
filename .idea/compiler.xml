@@ -23,6 +23,8 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="gae" />
+        <module name="parse" />
+        <module name="tools" />
       </profile>
     </annotationProcessing>
   </component>

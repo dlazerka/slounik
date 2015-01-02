@@ -47,6 +47,8 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/gae/pom.xml" />
+        <option value="$PROJECT_DIR$/tools/pom.xml" />
+        <option value="$PROJECT_DIR$/parse/pom.xml" />
       </list>
     </option>
   </component>
