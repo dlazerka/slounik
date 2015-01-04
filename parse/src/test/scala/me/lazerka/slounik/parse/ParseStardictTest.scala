@@ -13,6 +13,35 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		ParseStardict.parseLine(str) should be (Array("ускудлаціць", "узлахмаціць"))
 	}
 
+	"parseLine" should "parse папячы" in {
+		val str = """|<b>папячы</b> —
+			         | 1) испечь, изжарить (<i>долго, неоднократно</i>));
+					 | 2) обжечь, опалить (<i>огнём, солнцем</i>);
+					 | 3) попечь, пожарить (<i>некоторое время</i>)
+		             |""".stripMargin
+
+		ParseStardict.parseLine(str) should be (Array("испечь", "изжарить", "обжечь", "опалить", "попечь", "пожарить"))
+	}
+
+	"parseLine" should "parse асадка" in {
+		val str = """|<b>асадка</b> —
+			         | 1) насадка, присадка;
+					 | 2) оправка, обрамление;
+					 | 3) установка;
+					 | 4) <i>уст.</i> ручка <i>(письменная принадлежность</i>)
+		             |""".stripMargin
+
+		ParseStardict.parseLine(str) should be
+				Array("насадка", "присадка", "оправка", "обрамление", "установка", "ручка")
+	}
+
+	"parseLine" should "parse кіраванне" in {
+		val str = """|<b>кіраванне</b> — 1) управление; 2) руководство; правление 3) <i>лінгв.</i> управление
+		             |""".stripMargin
+
+		ParseStardict.parseLine(str) should be (Array("управление", "руководство"))
+	}
+
 	"parseLine" should "parse ух" in {
 		val str = """|<b>ух</b> <i>межд.</i><br>
 		             |<b>1.</b> <i>(при выражении восхищения, удивления)</i> ух<br>
