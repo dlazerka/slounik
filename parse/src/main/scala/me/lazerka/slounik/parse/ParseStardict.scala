@@ -68,6 +68,7 @@ object ParseStardict {
 
 		val fromLang = args(0)
 		val toLang = args(1)
+		val langsSorted = Array(fromLang, toLang).sorted.reduce(_ + _)
 
 		val dictFilePath = args(2)
 		val dictContent: Array[Byte] = readDictFile(dictFilePath)
@@ -108,17 +109,28 @@ object ParseStardict {
 		}
 		logger.info("Read {} lines in {}ms", lines.size, stopwatch.elapsed(TimeUnit.MILLISECONDS))
 
-		def makeOutputLine(fromLemma: String, toLemmas: Array[String]): Seq[String] = {
-			// flatten values, repeating key
-			toLemmas.map(toLemma => fromLemma + '↔' + toLemma + '|' + fromLang + toLang)
+		def makeOutputLine(from: String, toLemmas: Array[String], line: String): String = {
+			try {
+				assume(!line.contains('↵'), line)
+				val line2 = line.replace('\n', '↵')
+
+				val to: String = toLemmas.reduce(_ + '↔' + _)
+
+				s"$langsSorted|$from|$fromLang→$to:$line2"
+			} catch {
+				case e: Exception =>
+					logger.error(s"Unable to make output line of: $line")
+					throw e
+			}
 		}
 
 		stopwatch.reset().start()
+
 		val result = lines
 				.par // With par it's 3x faster
 				.mapValues(parseLine)
-				.filter(_._2.nonEmpty)
-				.flatMap(el => makeOutputLine(el._1, el._2))
+				.filter(_._2._1.nonEmpty)
+				.map(el => makeOutputLine(el._1, el._2._1, el._2._2))
 				.reduce((line1, line2) => line1 + '\n' + line2)
 
 		logger.info("Converted to string in {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS))
@@ -171,7 +183,7 @@ object ParseStardict {
 	)
 	val dropPatterns = drop.map(_.r())
 
-	def parseLine(line: String): Array[String] = {
+	def parseLine(line: String): (Array[String], String) = {
 		var cleared = underline.replaceAllIn(line, "")
 
 		// Not foldLeft() for debugging.
@@ -181,11 +193,15 @@ object ParseStardict {
 		val lemmas = spaces.split(cleared.trim)
 				.filter(!_.isEmpty)
 				.distinct
-		lemmas.filter ({
+		if (lemmas.isEmpty) {
+			println(s"Nothing parsed from line $line")
+		}
+		val result = lemmas.filter ({
 			case lemmaPattern(_*) => true
 			case lemma =>
 				println(s"Skipped $lemma in $line")
 				false
 		})
+		(result, line)
 	}
 }
