@@ -10,7 +10,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 	"parseLine" should "parse simple lines" in {
 		val str = "<b>встрепать</b> — ускудлаціць, узлахмаціць"
 
-		ParseStardict.parseLine(str) should be (Array("ускудлаціць", "узлахмаціць"))
+		ParseStardict.parseLine(str)._1 should be (Array("ускудлаціць", "узлахмаціць"))
 	}
 
 	"parseLine" should "parse папячы" in {
@@ -20,7 +20,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 					 | 3) попечь, пожарить (<i>некоторое время</i>)
 		             |""".stripMargin
 
-		ParseStardict.parseLine(str) should be (Array("испечь", "изжарить", "обжечь", "опалить", "попечь", "пожарить"))
+		ParseStardict.parseLine(str)._1 should be (Array("испечь", "изжарить", "обжечь", "опалить", "попечь", "пожарить"))
 	}
 
 	"parseLine" should "parse асадка" in {
@@ -31,7 +31,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 					 | 4) <i>уст.</i> ручка <i>(письменная принадлежность</i>)
 		             |""".stripMargin
 
-		ParseStardict.parseLine(str) should be
+		ParseStardict.parseLine(str)._1 should be
 				Array("насадка", "присадка", "оправка", "обрамление", "установка", "ручка")
 	}
 
@@ -39,7 +39,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		val str = """|<b>кіраванне</b> — 1) управление; 2) руководство; правление 3) <i>лінгв.</i> управление
 		             |""".stripMargin
 
-		ParseStardict.parseLine(str) should be (Array("управление", "руководство"))
+		ParseStardict.parseLine(str)._1 should be (Array("управление", "руководство"))
 	}
 
 	"parseLine" should "parse ух" in {
@@ -51,7 +51,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		             |<b>ух! - раздался глухой удар</b> ух! - раздаўся глухі ўдар
 		             |""".stripMargin
 
-		ParseStardict.parseLine(str) should be (Array("ух"))
+		ParseStardict.parseLine(str)._1 should be (Array("ух"))
 	}
 
 	"parseLine" should "parse трое" in {
@@ -66,7 +66,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		             |<b>трое суток</b> трое сутак
 		             |""".stripMargin
 
-		ParseStardict.parseLine(str) should be (Array("тры", "трое"))
+		ParseStardict.parseLine(str)._1 should be (Array("тры", "трое"))
 	}
 
 	"parseLine" should "parse урок" in {
@@ -77,7 +77,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		             |<b>давать уроки (где-либо, кому-либо)</b> даваць урокі (дзе-небудзь, каму-небудзь)
 		             |""".stripMargin
 
-		ParseStardict.parseLine(str) should be (Array("урок"))
+		ParseStardict.parseLine(str)._1 should be (Array("урок"))
 	}
 
 	"parseLine" should "parse туда-сюда" in {
@@ -87,7 +87,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		             |<b>это ещё туда-сюда</b> гэта яшчэ сяк-так (сюды-туды)
 		             |""".stripMargin
 
-		ParseStardict.parseLine(str) should be (Array("туды-сюды", "сяк-так", "сюды-туды"))
+		ParseStardict.parseLine(str)._1 should be (Array("туды-сюды", "сяк-так", "сюды-туды"))
 	}
 
 	"parseLine" should "parse учитель" in {
@@ -96,7 +96,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		             |<b>присвоить почётное звание «Народный учитель Республики Беларусь»</b> прысвоіць ганаровае званне «Народны настаўнік Рэспублікі Беларусь»
 		             | """.stripMargin
 
-		ParseStardict.parseLine(str) should be (Array("настаўнік"))
+		ParseStardict.parseLine(str)._1 should be (Array("настаўнік"))
 	}
 
 	"parseLine" should "parse фантазия" in {
@@ -107,7 +107,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		             |<b>«Фантазия» Шумана</b> <i>муз.</i> «Фантазія» Шумана
 		             |""".stripMargin
 
-		ParseStardict.parseLine(str) should be (Array("фантазія"))
+		ParseStardict.parseLine(str)._1 should be (Array("фантазія"))
 	}
 
 	"parseLine" should "parse фаренгейт" in {
@@ -115,13 +115,13 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		             |<b>100° по фаренгейту</b> 100° па Фарэнгейту
 		             |""".stripMargin
 
-		ParseStardict.parseLine(str) should be (Array())
+		ParseStardict.parseLine(str)._1 should be (Array())
 	}
 
 	"parseLine" should "parse евклидов" in {
 		val str = """<b>евклидов</b> <i>см.</i> <a href="эвклидов">эвклидов</a>"""
 
-		ParseStardict.parseLine(str) should be (Array())
+		ParseStardict.parseLine(str)._1 should be (Array())
 	}
 
 	"parseLine" should "parse порошок" in {
@@ -149,7 +149,7 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		             |<br><b>порош<u>о</u>к ферроабраз<u>и</u>вный</b> - параш<u>о</u>к фераабраз<u>і</u>ўны
 		             |""".stripMargin
 
-		ParseStardict.parseLine(str) should be (Array("парашок"))
+		ParseStardict.parseLine(str)._1 should be (Array("парашок"))
 	}
 
 

@@ -80,7 +80,8 @@ mapper.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES); // default
 		Map<String,String> params = Maps.newHashMap();
 
 		ImmutableList<String> packagesToScan = ImmutableList.of(
-				"me.lazerka.slounik.gae.rest"
+				"me.lazerka.slounik.gae.rest",
+				"me.lazerka.slounik.gae.admin"
 //				"me.lazerka.slounik.gae.queue",
 //				"me.lazerka.slounik.gae._ah"
 		);

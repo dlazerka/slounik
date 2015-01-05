@@ -1,18 +1,17 @@
 package me.lazerka.slounik.gae;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.annotation.Cache;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.*;
 import com.googlecode.objectify.cmd.LoadType;
 import com.googlecode.objectify.cmd.SimpleQuery;
-import me.lazerka.slounik.gae.rest.Lang;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 /**
  * Main entity of words storage, optimized for searching.
@@ -24,69 +23,90 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Entity
 @Cache
 public class Entry {
-	public static final char ARROWS = '↔';
+	private static final char SEPARATOR = '|';
 
+	/**
+	 * For optimization, we store all needed for query here.
+	 * Format :
+	 * langsSorted|lemma|from|toLemma1&toLemma2&toLemma3|dict
+	 */
 	@Id
 	private String key;
+
+	/** Raw line original */
+	@Unindex
+	private String line;
+
+	////////// Parsed ///////////////
+	@Ignore
+	@JsonProperty
+	private String lemma;
+
+	@Ignore
+	@JsonProperty
+	private String from;
+
+	@Ignore
+	@JsonProperty
+	private String to;
+
+	@Ignore
+	@JsonProperty
+	private String dict;
+
+	@Ignore
+	@JsonProperty
+	private List<String> translations;
 
 	@SuppressWarnings("unused")
 	private Entry() {}
 
 	public Entry(Key<Entry> key) {
 		this.key = key.getName();
+		parseKey();
 	}
 
-	public Entry(String lemmaFrom, String lemmaTo, String langFrom, String langTo, String dictionaryName) {
-		checkArgument(langFrom.indexOf(':') == -1);
-		checkArgument(lemmaFrom.indexOf(ARROWS) == -1);
-		checkArgument(langTo.indexOf(':') == -1);
-		checkArgument(lemmaTo.indexOf(ARROWS) == -1);
-		checkNotNull(dictionaryName);
+	public Entry(@Nonnull String key, @Nonnull String line) {
+		this.key = checkNotNull(key);
+		this.line = line;
+		checkArgument(key.length() < 500, key);
+		parseKey();
+	}
 
-		this.key = langFrom + ':' + lemmaFrom + ARROWS + langTo + ':' + lemmaTo + ARROWS + dictionaryName;
+	@OnLoad
+	private void parseKey() {
+		List<String> split = Splitter.on(SEPARATOR).splitToList(key);
+		checkState(split.size() == 5, key);
 
-		checkArgument(key.length() < 500); // GAE limit on keys: http://stackoverflow.com/questions/2557632
+		lemma = split.get(1);
+		from = split.get(2);
+		checkArgument(from.length() == 2);
+
+		String langs = split.get(0);
+		to = langs.startsWith(from) ? langs.substring(2, 4) : langs.substring(0, 2);
+
+		translations = ImmutableList.copyOf(Splitter.on('&').split(split.get(3)));
+		dict = split.get(4);
 	}
 
 	/**
 	 * Holds logic for key construction.
 	 */
-	public static SimpleQuery<Entry> addFullMatchFilter(String query, Lang from, LoadType<Entry> type) {
-		checkArgument(query.indexOf(ARROWS) == -1, query);
-		return addPrefixMatchFilter(query + ARROWS, from, type);
+	public static SimpleQuery<Entry> addFullMatchFilter(String lang1, String lang2, String query, LoadType<Entry> type) {
+		checkArgument(query.indexOf(SEPARATOR) == -1, query);
+		return addPrefixMatchFilter(lang1, lang2, query + SEPARATOR, type);
 	}
 
-	public static SimpleQuery<Entry> addPrefixMatchFilter(String query, Lang from, LoadType<Entry> type) {
-		String fromS = from.name().toLowerCase();
+	public static SimpleQuery<Entry> addPrefixMatchFilter(String lang1, String lang2, String query, LoadType<Entry> type) {
+		checkArgument(query.indexOf(SEPARATOR) == -1 || query.indexOf(SEPARATOR) == query.length() - 1, query);
+		String langs = lang1.compareTo(lang2) < 0 ? (lang1 + lang2) : (lang2 + lang1);
+
 		return type
-				.filterKey(">=", Key.create(Entry.class, fromS + ':' + query))
-				.filterKey("<", Key.create(Entry.class, fromS + ':' + query + Character.MAX_VALUE));
+				.filterKey(">=", Key.create(Entry.class, langs + SEPARATOR + query))
+				.filterKey("<", Key.create(Entry.class, langs + SEPARATOR + query + Character.MAX_VALUE));
 	}
 
-	private String getKeyPart(int index) {
-		List<String> parts = Splitter.on(ARROWS).splitToList(key);
-		String part = parts.get(index / 2);
-		List<String> split = Splitter.on(':').splitToList(part);
-		return split.get(index % 2);
-	}
-
-	public Lang getLangFrom() {
-		return Lang.valueOf(getKeyPart(0).toUpperCase());
-	}
-
-	public String getLemmaFrom() {
-		return getKeyPart(1);
-	}
-
-	public Lang getLangTo() {
-		return Lang.valueOf(getKeyPart(2).toUpperCase());
-	}
-
-	public String getLemmaTo() {
-		return getKeyPart(3);
-	}
-
-	public String getDictionaryName() {
-		return getKeyPart(4);
+	public String getLine() {
+		return line;
 	}
 }

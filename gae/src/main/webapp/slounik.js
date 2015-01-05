@@ -10,7 +10,7 @@ angular.module('me.lazerka.slounik', [])
 		$scope.$watch('input', function() {
 			if (!$scope.input) return;
 
-			$http.get('/rest/entry/search/' + encodeURI($scope.input))
+			$http.get('/rest/entry/search/be/ru/' + encodeURI($scope.input))
 				// binding requested value so we can handle race conditions.
 				.then(resultsArrived.bind(this, $scope.input));
 		});
@@ -39,6 +39,7 @@ angular.module('me.lazerka.slounik', [])
 			$scope.results = [];
 			$scope.results.input = requestedInput;
 			angular.forEach(response.data, function(res) {
+				// todo
 				$scope.results.push({
 					ru: getResult(res['ru']),
 					be: getResult(res['be'])

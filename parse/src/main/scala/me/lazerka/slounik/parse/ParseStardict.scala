@@ -25,9 +25,8 @@ object ParseStardict {
 	val logger: Logger = LoggerFactory.getLogger(this.getClass)
 	val utf8 = StandardCharsets.UTF_8
 
-	val lemmaPattern = "([А-Яа-яЎўІіЁё][а-яўіё'-]*)".r
-	val lemmaDoublePattern = s"$lemmaPattern \\($lemmaPattern\\)".r
-	val lemmaTriplePattern = s"$lemmaPattern \\($lemmaPattern, $lemmaPattern\\)".r
+	val lemmaPattern = "[А-Яа-яЎўІіЁё]|([А-Яа-яЎўІіЁё][а-яўіё' -]*[а-яўіё'!-])".r
+	val lemmaDeclarationPattern = s"$lemmaPattern( \\(?$lemmaPattern(, $lemmaPattern)*\\)?)?".r
 
 	def readDictFile(dictFilePath: String): Array[Byte] = {
 		val file: File = new File(dictFilePath)
@@ -77,8 +76,9 @@ object ParseStardict {
 		val idx = readIdxFile(idxFilePath)
 
 		val resultFilePath = dictFilePath.replace(".dict.dz", ".slounik")
+		val dictCode = new File(dictFilePath).getName.replace(".dict.dz", "")
 
-		val lines = mutable.HashMap.empty[String, String]
+		val lines = mutable.HashMap.empty[Array[String], String]
 		var i = 0
 		while (i < idx.size) {
 			val lemmaBytes = idx.slice(i, idx.indexOf('\0', i))
@@ -91,32 +91,36 @@ object ParseStardict {
 			val lineBytes = dictContent.slice(dict_offset, dict_offset + dict_size)
 			val line = new String(lineBytes, utf8)
 
-			val lemma = new String(lemmaBytes, utf8)
-			lemma match {
-				case lemmaPattern(one) =>
-					lines.put(one, line)
-				case lemmaDoublePattern(first, second) =>
-					lines.put(first, line)
-					lines.put(second, line)
-				case lemmaTriplePattern(first, second, third) =>
-					lines.put(first, line)
-					lines.put(second, line)
-					lines.put(third, line)
-				case _ =>
-					logger.warn("Skipped {} at {}", lemma, i)
-					i += 8
-			}
+			val lemmaString = new String(lemmaBytes, utf8)
+			val lemmas = lemmaString
+					.split('(')
+					.flatMap(_.split(','))
+					.map(_.replace(')', ' ').trim)
+					.filter(lemma => {
+						if (lemmaPattern.pattern.matcher(lemma).matches()) {
+							true
+						} else {
+							println(s"Skipped lemma: $lemma")
+							false
+						}
+					})
+			lines.put(lemmas, line)
 		}
 		logger.info("Read {} lines in {}ms", lines.size, stopwatch.elapsed(TimeUnit.MILLISECONDS))
 
-		def makeOutputLine(from: String, toLemmas: Array[String], line: String): String = {
+		def makeOutputLine(lemma: String, translations: Array[String], line: String): String = {
 			try {
-				assume(!line.contains('↵'), line)
+				assume(!line.contains('↵'), line) // lines separator
 				val line2 = line.replace('\n', '↵')
+				assume(!lemma.contains('|'), line) // Separates parts of key
+				assume(!translations.exists(_.contains('|')), translations) // Separates translations from dictCode
+				assume(!translations.exists(_.contains('&')), translations) // Separates translations from each other
 
-				val to: String = toLemmas.reduce(_ + '↔' + _)
+				val to: String = translations.reduce(_ + '&' + _)
 
-				s"$langsSorted|$from|$fromLang→$to:$line2"
+				val key: String = s"$langsSorted|$lemma|$fromLang|$to|$dictCode"
+				assume(key.length < 500, line) // due to GAE restriction on key length
+				s"$key:$line2"
 			} catch {
 				case e: Exception =>
 					logger.error(s"Unable to make output line of: $line")
@@ -127,9 +131,10 @@ object ParseStardict {
 		stopwatch.reset().start()
 
 		val result = lines
-				.par // With par it's 3x faster
+				.par // With par it's 3x-10x faster
 				.mapValues(parseLine)
 				.filter(_._2._1.nonEmpty)
+				.flatMap(line => line._1.map(lemma => (lemma, line._2))) // flatten keys
 				.map(el => makeOutputLine(el._1, el._2._1, el._2._2))
 				.reduce((line1, line2) => line1 + '\n' + line2)
 
@@ -137,7 +142,7 @@ object ParseStardict {
 		stopwatch.reset().start()
 
 		val file = new File(resultFilePath)
-		assert(!file.exists())
+		assert(!file.exists(), s"Output file already exists: $file")
 		val fw = new FileWriter(file)
 		try {
 			fw.write(result)

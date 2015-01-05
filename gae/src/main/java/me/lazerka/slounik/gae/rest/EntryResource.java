@@ -26,35 +26,23 @@ public class EntryResource {
 	private static final int MAX_RESULTS = 100;
 
 	@GET
-	@Path("search/{query}")
+	@Path("search/{lang1:[a-z][a-z]}/{lang2:[a-z][a-z]}/{query}")
 	@Produces("application/json")
-	public List<EntryBean> list(@PathParam("query") String query) {
+	public List<Entry> list(
+			@PathParam("lang1") String lang1,
+			@PathParam("lang2") String lang2,
+			@PathParam("query") String query
+	) {
 		validateQuery(query);
 
-		List<Key<Entry>> ruKeys = fetch(query, Lang.RU);
-		List<Key<Entry>> beKeys = fetch(query, Lang.BE);
+		List<Key<Entry>> keys = fetch(query, lang1, lang2);
 
-		int size = ruKeys.size() + beKeys.size();
-		logger.trace("Found {} results: {} ruKeys, {} beKeys", size, ruKeys.size(), beKeys.size());
+		logger.trace("Found {} results", keys.size());
 
-		List<EntryBean> result = new ArrayList<>(size);
-		for(Key<Entry> entryKey : ruKeys) {
-			Entry entry = new Entry(entryKey);
-			result.add(new EntryBean(
-					entry.getLemmaFrom(),
-					entry.getLemmaTo(),
-					entry.getLangFrom(),
-					entry.getLangTo(),
-					entry.getDictionaryName()
-			));
+		List<Entry> result = new ArrayList<>(keys.size());
+		for(Key<Entry> entryKey : keys) {
+			result.add(new Entry(entryKey));
 		}
-		result.add(new EntryBean(
-				"sdf",
-				"fdg",
-				Lang.BE,
-				Lang.RU,
-				"sdfg"
-		));
 		return result;
 	}
 
@@ -71,24 +59,24 @@ public class EntryResource {
 							.entity("Query max length is " + MAX_QUERY_LENGTH)
 							.build());
 		}
-		if (query.indexOf(Entry.ARROWS) != -1) {
-			throw new WebApplicationException(
-					Response.status(Status.BAD_REQUEST)
-							.entity("Query may not contain " + Entry.ARROWS)
-							.build());
-		}
 	}
 
-	private List<Key<Entry>> fetch(String query, Lang from) {
+	private List<Key<Entry>> fetch(String query, String lang1, String lang2) {
 		LoadType<Entry> type = ofy()
 				.load()
 				.type(Entry.class);
 		SimpleQuery<Entry> simpleQuery;
-		if (query.endsWith(" ")) {
-			query = query.substring(0, query.length() - 1);
-			simpleQuery = Entry.addFullMatchFilter(query, from, type);
-		} else {
-			simpleQuery = Entry.addPrefixMatchFilter(query, from, type);
+		try {
+			if (query.endsWith(" ")) {
+				query = query.substring(0, query.length() - 1);
+				simpleQuery = Entry.addFullMatchFilter(lang1, lang2, query, type);
+			} else {
+				simpleQuery = Entry.addPrefixMatchFilter(lang1, lang2, query, type);
+			}
+		} catch (IllegalArgumentException e) {
+			throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+					.entity("Unacceptable query")
+					.build());
 		}
 		return simpleQuery
 				.limit(MAX_RESULTS)

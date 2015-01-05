@@ -1,59 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html ng-csp>
 <head>
-<title>Admin</title>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<link rel="icon" type="image/png" href="/favicon.ico">
-<style type="text/css">
-* {
-	font-family: FreeSans, Helvetica, sans-serif;
-	font-size: medium;
-}
-h2 {
-	text-align: left;
-}
-</style>
+	<title>Admin</title>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>Слоўнік</title>
+	<link rel="icon" type="image/png" href="/favicon.ico"/>
+	<link rel="stylesheet" type="text/css" href="/slounik.css?crc=predeploy"/>
+	<style type="text/css">
+		[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak],
+		.ng-cloak, .x-ng-cloak,
+		.ng-hide:not(.ng-hide-animate) {
+			display: none !important;
+		}
+
+		ng\:form {
+			display: block;
+		}
+	</style>
+
+	<script type="text/javascript" src="/lib/jquery-2.1.1.js"
+	        predeploy="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
+	<script type="text/javascript" src="/lib/angular-1.3.5.js"
+	        predeploy="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js" defer></script>
+
+	<script type="text/javascript" src="admin.js?crc=predeploy" defer></script>
 </head>
-<body>
-	<!-- for forms -->
-	<iframe src="javascript:''" id="dummy" tabindex="-1"
-		style="position: absolute; width: 0; height: 0; border: 0"></iframe>
-
-	<h2>Upload Colon</h2>
-	<form target="dummy" action="upload/colon" enctype="multipart/form-data" method="POST">
-		File: <input type="file" name="content" accept="text/plain; charset=UTF-8">
-		From: <select name="langFrom">
-			<option>be</option>
-			<option selected="selected">ru</option>
-		</select>
-		To: <select name="langTo">
-			<option selected="selected">be</option>
-			<option>ru</option>
-		</select>
-		<button onclick="this.form.submit()">Submit</button>
-	</form>
-
+<body ng-app="me.lazerka.slounik.admin" ng-controller="AdminController">
 	<h2>Upload Stardict</h2>
-	<form target="dummy" action="upload/stardict" enctype="multipart/form-data" method="POST">
-		Dict file: <input type="file" name="fileDict" accept="text/plain; charset=UTF-8">
-		Idx file: <input type="file" name="fileIdx" accept="text/plain; charset=UTF-8">
-		From: <select name="langFrom">
+	<!--<label>From:
+		<select ng-model="langFrom">
 			<option>be</option>
 			<option>ru</option>
 		</select>
-		To: <select name="langTo">
+	</label>
+	<label>To:
+		<select ng-model="langTo">
 			<option>be</option>
 			<option>ru</option>
 		</select>
-		<button onclick="this.form.submit()">Submit</button>
-	</form>
-
-	<h2>Split StarDict</h2>
-	<form target="dummy" action="split/stardict" method="GET">
-		Name: <input type="text" name="name">
-		<button type="submit">Split</button>
-	</form>
-	<h2>Parse</h2>
-	<a href="mapreduce/status">mapreduce/status</a>
+	</label>-->
+	<input type="file" name="fileDict" my-onchange="uploadFile">
 </body>
 </html>
