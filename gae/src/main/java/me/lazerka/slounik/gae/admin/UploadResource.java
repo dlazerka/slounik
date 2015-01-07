@@ -6,12 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
 /**
@@ -34,20 +36,27 @@ public class UploadResource {
 
 		List<Entry> batch = new ArrayList<>(10000);
 		for(String keyLine : lines) {
-			batchSize += keyLine.length();
-			List<String> split = Splitter.on(':').splitToList(keyLine);
-			checkArgument(split.size() == 2, split.size());
-			String key = split.get(0);
-			String line = split.get(1).replace('↵', '\n');
+			try {
+				batchSize += keyLine.length();
+				List<String> split = Splitter
+						.on(':') // original line may contain old values
+						.limit(2)
+						.splitToList(keyLine);
+				String key = split.get(0);
+				String line = split.get(1).replace('↵', '\n');
 
-			Entry entry = new Entry(key, line);
-			batch.add(entry);
+				Entry entry = new Entry(key, line);
+				batch.add(entry);
 
-			if (batchSize > 500000) {
-				logger.trace("Saving {} entities", batch.size());
-				ofy().save().entities(batch);
-				batch.clear();
-				batchSize = 0;
+				if (batchSize > 500000) {
+					logger.trace("Saving {} entities", batch.size());
+					ofy().save().entities(batch);
+					batch.clear();
+					batchSize = 0;
+				}
+			} catch (Exception e) {
+				logger.error("At line {}", keyLine);
+				throw e;
 			}
 		}
 
