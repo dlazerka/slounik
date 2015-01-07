@@ -152,5 +152,22 @@ class ParseStardictTest extends FlatSpec with Matchers {
 		ParseStardict.parseLine(str)._1 should be (Array("парашок"))
 	}
 
+	"parseLine" should "parse ш-ш" in {
+		val str = """<b>ш-ш</b> <i>межд. разг.</i> ш-ш; ша; ціха<br><b>ш-ш, слушайте!</b> ш-ш, слухайце!"""
+
+		ParseStardict.parseLine(str)._1 should be (Array("ш-ш", "ша", "ціха"))
+	}
+
+	"parseLine" should "parse ветвь" in {
+		val str = """<b>ветвь</b> — 1) галіна (<i>дрэва</i>); 2) галіна (<i>навукі</i>); 3) <i>ж.-д.</i> ветка"""
+
+		ParseStardict.parseLine(str)._1 should be (Array("галіна", "ветка"))
+	}
+
+	"parseLine" should "parse ых" in {
+		val str = """<b>ых</b>, <i>междомет.</i><br><b>1.</b> межд. негодования, - эх. Нсл. 722; Ксл.<br><i>Ых, які ты нягодны!</i> Лятоўшчына Куз."""
+
+		ParseStardict.parseLine(str)._1 should be (Array())
+	}
 
 }

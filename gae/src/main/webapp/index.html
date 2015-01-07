@@ -30,9 +30,9 @@
 
 <body class="ng-cloak" ng-app="me.lazerka.slounik">
 <div class="main" ng-controller="SlounikController">
-	<input type="text" class="input" maxlength="100" ng-model="input"/>
+	<input type="text" class="input" maxlength="100" ng-model="input" preselect/>
 
-	<table class="results" ng-show="found">
+	<table class="results" ng-show="found && !searching">
 		<tr>
 			<th class="left">бел</th>
 			<th></th>
@@ -40,17 +40,25 @@
 		</tr>
 		<tr ng-repeat="result in results">
 			<td class="left">
-				<span class="match">{{result.be.match}}</span>{{result.be.rest}}
+				<span ng-repeat="lemma in result.be">
+					<span class="match">{{lemma.match}}</span>{{lemma.rest}}<span ng-show="! $last">, </span>
+				</span>
 			</td>
 			<td class="arrows">{{result.arrow}}</td>
 			<td class="right">
-				<span class="match">{{result.ru.match}}</span>{{result.ru.rest}}
+				<span ng-repeat="lemma in result.ru">
+					<span class="match">{{lemma.match}}</span>{{lemma.rest}}<span ng-show="! $last">, </span>
+				</span>
 			</td>
 		</tr>
 	</table>
 
-	<div class="no-results" ng-show="!found">
-		ня знойдзена
+	<div class="no-results" ng-show="!found && !searching">
+		ничога
+	</div>
+
+	<div class="searching" ng-show="searching">
+		шукаем...
 	</div>
 </div>
 

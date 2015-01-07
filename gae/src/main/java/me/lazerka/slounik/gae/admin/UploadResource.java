@@ -21,19 +21,6 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 public class UploadResource {
 	private static final Logger logger = LoggerFactory.getLogger(UploadResource.class);
 
-	@GET
-	@Path("/{lang1}/{lang2}")
-	public String get(
-			String data,
-			@PathParam("lang1") String lang1,
-			@PathParam("lang2") String lang2,
-			@Context HttpServletRequest req
-	) {
-		logger.info("kuku");
-		return "kuku";
-	}
-
-
 	@POST
 	@Consumes("text/plain")
 	@Produces("text/plain")
@@ -57,6 +44,7 @@ public class UploadResource {
 			batch.add(entry);
 
 			if (batchSize > 500000) {
+				logger.trace("Saving {} entities", batch.size());
 				ofy().save().entities(batch);
 				batch.clear();
 				batchSize = 0;
@@ -64,9 +52,11 @@ public class UploadResource {
 		}
 
 		if (!batch.isEmpty()) {
+			logger.trace("Saving {} entities", batch.size());
 			ofy().save().entities(batch).now();
 		}
 
+		logger.info("Saved {} lines", lines.size());
 		return "Stored lines: " + lines.size();
 	}
 }
