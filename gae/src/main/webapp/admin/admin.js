@@ -43,17 +43,20 @@ angular.module('me.lazerka.slounik.admin', [])
 						// May happen if you select a file, and then click Choose again and click Cancel.
 						throw Error('No files in ' + event.target);
 					}
-					var file = files[0];
 
-					if (!file.size) {
-						alert("File size is 0, is it a file?");
-						return;
-					} else if (file.size > (32 << 20)) {
-						alert("Sorry, files larger than 32 MB aren't supported.");
-						return;
+					for (var i = 0; i < files.length; i++) {
+						var file = files[i];
+
+						if (!file.size) {
+							alert("File size is 0, is it a file?");
+							return;
+						} else if (file.size > (32 << 20)) {
+							alert("Sorry, files larger than 32 MB aren't supported.");
+							return;
+						}
+
+						$scope.myOnchange(file);
 					}
-
-					$scope.myOnchange(file);
 					//$scope[attrs.myOnchange](file);
 				});
 			}

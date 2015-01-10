@@ -27,18 +27,6 @@
 </head>
 <body ng-app="me.lazerka.slounik.admin" ng-controller="AdminController">
 	<h2>Upload Stardict</h2>
-	<!--<label>From:
-		<select ng-model="langFrom">
-			<option>be</option>
-			<option>ru</option>
-		</select>
-	</label>
-	<label>To:
-		<select ng-model="langTo">
-			<option>be</option>
-			<option>ru</option>
-		</select>
-	</label>-->
-	<input type="file" name="fileDict" my-onchange="uploadFile">
+	<input type="file" multiple name="fileDict" my-onchange="uploadFile">
 </body>
 </html>

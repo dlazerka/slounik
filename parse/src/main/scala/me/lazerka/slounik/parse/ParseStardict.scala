@@ -12,15 +12,17 @@ import sun.misc.IOUtils
 import scala.collection.mutable
 
 /**
-  * Processes all .html files:
-  * Searches for strings like
-  * {{{
-  * &lt;script src="lib/jquery.js" predeploy="//googleapis.cdn.com/jquery.min.js"&gt;
-  * }}}
-  * and replaces `src` with `predeploy`.
-  *
-  * @author Dzmitry Lazerka
-  */
+ * This code is kinda dirty, but that's OK.
+ *
+ * Processes all .html files:
+ * Searches for strings like
+ * {{{
+ * &lt;script src="lib/jquery.js" predeploy="//googleapis.cdn.com/jquery.min.js"&gt;
+ * }}}
+ * and replaces `src` with `predeploy`.
+ *
+ * @author Dzmitry Lazerka
+ */
 object ParseStardict {
 	val logger: Logger = LoggerFactory.getLogger(this.getClass)
 	val utf8 = StandardCharsets.UTF_8
@@ -28,8 +30,133 @@ object ParseStardict {
 	val lemmaPattern = "[А-Яа-яЎўІіЁё]|([А-Яа-яЎўІіЁё][а-яўіё' -]*[а-яўіё'!-])".r
 	val lemmaDeclarationPattern = s"$lemmaPattern( \\(?$lemmaPattern(, $lemmaPattern)*\\)?)?".r
 
-	def readDictFile(dictFilePath: String): Array[Byte] = {
-		val file: File = new File(dictFilePath)
+	/**
+	 * Usage: <pre>
+	 *     ParseStardict <path to .dict.dz file>
+	 * </pre>
+	 */
+	def main(args: Array[String]) = {
+		val stopwatch = Stopwatch.createStarted()
+		assert(args.length == 3)
+		assert(args(0).matches("[a-z][a-z]"))
+		assert(args(1).matches("[a-z][a-z]"))
+
+		val fromLang = args(0)
+		val toLang = args(1)
+		val langsSorted = Array(fromLang, toLang).sorted.reduce(_ + _)
+
+		val dir = new File(args(2))
+		assert(dir.isDirectory)
+		traverse(dir)
+
+		def traverse(dir: File): Unit = {
+			val nodes = dir.listFiles()
+
+			nodes.filter(node => node.isFile && node.getName.endsWith(".dict.dz"))
+					.map(processDict)
+
+			nodes.filter(_.isDirectory)
+					.map(traverse)
+		}
+		logger.info("Parsed all in {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS))
+
+		def processDict(dictFile: File) {
+			logger.info("Parsing {}", dictFile.getAbsolutePath)
+			val stopwatch = Stopwatch.createStarted()
+			val dictCode = dictFile.getName.replace(".dict.dz", "")
+
+			val dictContent: Array[Byte] = readDictFile(dictFile)
+
+			val idxFilePath = dictFile.getPath.replace(".dict.dz", ".idx")
+			val idx = readIdxFile(idxFilePath)
+
+			val resultFilePath = dictFile.getPath.replace(".dict.dz", ".slounik")
+			val resultFile = new File(resultFilePath)
+			if (resultFile.exists()) {
+				logger.info("File {} exists, skipping", resultFile.getAbsolutePath)
+				return
+			}
+
+			val lines = mutable.HashMap.empty[Array[String], String]
+			var i = 0
+			while (i < idx.size) {
+				val lemmaBytes = idx.slice(i, idx.indexOf('\u0000', i))
+				i += lemmaBytes.length + 1
+
+				val dict_offset = readInt(idx.slice(i, i + 4))
+				i += 4
+				val dict_size = readInt(idx.slice(i, i + 4))
+				i += 4
+				val lineBytes = dictContent.slice(dict_offset, dict_offset + dict_size)
+				val line = new String(lineBytes, utf8)
+
+				val lemmaString = new String(lemmaBytes, utf8)
+				val lemmas = lemmaString
+						.split('(')
+						.flatMap(_.split(','))
+						.map(_.replace(')', ' ').trim)
+						.filter(lemma => {
+					if (lemmaPattern.pattern.matcher(lemma).matches()) {
+						true
+					} else {
+						println(s"Skipped lemma: $lemma")
+						false
+					}
+				})
+				lines.put(lemmas, line)
+			}
+			logger.info("Read {} lines in {}ms", lines.size, stopwatch.elapsed(TimeUnit.MILLISECONDS))
+
+			def makeOutputLine(lemma: String, translations: Array[String], line: String): String = {
+				try {
+					assume(!line.contains('↵'), line) // lines separator
+					val line2 = line.replace('\n', '↵')
+					assume(!lemma.contains('|'), line) // Separates parts of key
+					assume(!translations.exists(_.contains('|')), translations) // Separates translations from dictCode
+					assume(!translations.exists(_.contains('&')), translations) // Separates translations from each other
+
+					val to: String = translations.reduce(_ + '&' + _)
+
+					val key: String = s"$langsSorted|$lemma|$fromLang|$to|$dictCode"
+					assume(key.length < 500, line) // due to GAE restriction on key length
+					s"$key:$line2"
+				} catch {
+					case e: Exception =>
+						logger.error(s"Unable to make output line of: $line")
+						throw e
+				}
+			}
+
+			stopwatch.reset().start()
+
+			val parsed = lines
+					.par // With par it's 3x-10x faster
+					.mapValues(parseLine)
+					.filter(_._2._1.nonEmpty)
+					.flatMap(line => line._1.map(lemma => (lemma, line._2))) // flatten keys
+			if (parsed.isEmpty) {
+				logger.warn("Nothing parsed from {}", dictFile.getAbsolutePath)
+				return
+			}
+			val result = parsed
+					.map(el => makeOutputLine(el._1, el._2._1, el._2._2))
+					.reduce((line1, line2) => line1 + '\n' + line2)
+
+			logger.info("Converted to string in {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS))
+			stopwatch.reset().start()
+
+			assert(!resultFile.exists(), s"Output file already exists: $resultFile")
+			val fw = new FileWriter(resultFile)
+			try {
+				fw.write(result)
+			} finally {
+				fw.close()
+			}
+			logger.info("Written to {} in {}ms", resultFile.getName, stopwatch.elapsed(TimeUnit.MILLISECONDS))
+		}
+	}
+
+	def readDictFile(file: File): Array[Byte] = {
 		assert(file.canRead, file.getAbsolutePath)
 
 		val zis = new GZIPInputStream(new FileInputStream(file))
@@ -52,106 +179,6 @@ object ParseStardict {
 			is.close()
 		}
 	}
-
-	/**
-	 * Usage: <pre>
-	 *     ParseStardict <path to .dict.dz file>
-	 * </pre>
-	 */
-	def main(args: Array[String]) = {
-		val stopwatch = Stopwatch.createStarted()
-		assert(args.length == 3)
-		assert(args(0).matches("[a-z][a-z]"))
-		assert(args(1).matches("[a-z][a-z]"))
-		assert(args(2).endsWith(".dict.dz"))
-
-		val fromLang = args(0)
-		val toLang = args(1)
-		val langsSorted = Array(fromLang, toLang).sorted.reduce(_ + _)
-
-		val dictFilePath = args(2)
-		val dictContent: Array[Byte] = readDictFile(dictFilePath)
-
-		val idxFilePath = dictFilePath.replace(".dict.dz", ".idx")
-		val idx = readIdxFile(idxFilePath)
-
-		val resultFilePath = dictFilePath.replace(".dict.dz", ".slounik")
-		val dictCode = new File(dictFilePath).getName.replace(".dict.dz", "")
-
-		val lines = mutable.HashMap.empty[Array[String], String]
-		var i = 0
-		while (i < idx.size) {
-			val lemmaBytes = idx.slice(i, idx.indexOf('\0', i))
-			i += lemmaBytes.length + 1
-
-			val dict_offset = readInt(idx.slice(i, i + 4))
-			i += 4
-			val dict_size = readInt(idx.slice(i, i + 4))
-			i += 4
-			val lineBytes = dictContent.slice(dict_offset, dict_offset + dict_size)
-			val line = new String(lineBytes, utf8)
-
-			val lemmaString = new String(lemmaBytes, utf8)
-			val lemmas = lemmaString
-					.split('(')
-					.flatMap(_.split(','))
-					.map(_.replace(')', ' ').trim)
-					.filter(lemma => {
-						if (lemmaPattern.pattern.matcher(lemma).matches()) {
-							true
-						} else {
-							println(s"Skipped lemma: $lemma")
-							false
-						}
-					})
-			lines.put(lemmas, line)
-		}
-		logger.info("Read {} lines in {}ms", lines.size, stopwatch.elapsed(TimeUnit.MILLISECONDS))
-
-		def makeOutputLine(lemma: String, translations: Array[String], line: String): String = {
-			try {
-				assume(!line.contains('↵'), line) // lines separator
-				val line2 = line.replace('\n', '↵')
-				assume(!lemma.contains('|'), line) // Separates parts of key
-				assume(!translations.exists(_.contains('|')), translations) // Separates translations from dictCode
-				assume(!translations.exists(_.contains('&')), translations) // Separates translations from each other
-
-				val to: String = translations.reduce(_ + '&' + _)
-
-				val key: String = s"$langsSorted|$lemma|$fromLang|$to|$dictCode"
-				assume(key.length < 500, line) // due to GAE restriction on key length
-				s"$key:$line2"
-			} catch {
-				case e: Exception =>
-					logger.error(s"Unable to make output line of: $line")
-					throw e
-			}
-		}
-
-		stopwatch.reset().start()
-
-		val result = lines
-				.par // With par it's 3x-10x faster
-				.mapValues(parseLine)
-				.filter(_._2._1.nonEmpty)
-				.flatMap(line => line._1.map(lemma => (lemma, line._2))) // flatten keys
-				.map(el => makeOutputLine(el._1, el._2._1, el._2._2))
-				.reduce((line1, line2) => line1 + '\n' + line2)
-
-		logger.info("Converted to string in {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS))
-		stopwatch.reset().start()
-
-		val file = new File(resultFilePath)
-		assert(!file.exists(), s"Output file already exists: $file")
-		val fw = new FileWriter(file)
-		try {
-			fw.write(result)
-		} finally {
-			fw.close()
-		}
-		logger.info("Written to {} in {}ms", file.getName, stopwatch.elapsed(TimeUnit.MILLISECONDS))
-	}
-
 
 	/** Reads 4 bytes and converts them to int. */
 	def readInt(took: Array[Byte]): Int = {
