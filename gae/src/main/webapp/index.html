@@ -38,17 +38,28 @@
 			<th></th>
 			<th class="right">рус</th>
 		</tr>
-		<tr ng-repeat="result in results">
+		<tr ng-repeat="row in rows">
 			<td class="left">
-				<span ng-repeat="lemma in result.be">
-					<span class="match">{{lemma.match}}</span>{{lemma.rest}}<span ng-show="! $last">, </span>
-				</span>
+				<div class="dict">{{row.be.dict}}</div>
+				<div ng-repeat="translation in row.be.translations"
+				      ng-mouseover="mouseOver(translation, row.be)"
+				      ng-mouseleave="mouseOut(row.be)"
+				      class="translation"
+				>
+					<span class="match">{{translation.match}}</span>{{translation.rest}}<span ng-show="! $last">,&nbsp</span>
+				</div>
 			</td>
-			<td class="arrows">{{result.arrow}}</td>
+			<td class="arrows">{{row.arrow}}</td>
 			<td class="right">
-				<span ng-repeat="lemma in result.ru">
-					<span class="match">{{lemma.match}}</span>{{lemma.rest}}<span ng-show="! $last">, </span>
+				<div ng-repeat="translation in row.ru.translations"
+				      ng-mouseover="mouseOver(translation, row.ru)"
+				      ng-mouseleave="mouseOut(row.ru)"
+				      class="translation"
+				>
+					<span class="match">{{translation.match}}</span>{{translation.rest}}<span ng-show="! $last">,&nbsp
 				</span>
+				</div>
+				<div class="dict">{{row.ru.dict}}</div>
 			</td>
 		</tr>
 	</table>

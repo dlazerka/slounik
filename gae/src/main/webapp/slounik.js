@@ -1,18 +1,17 @@
 'use strict';
 angular.module('me.lazerka.slounik', [])
-	.directive('preselect', function() {
+	.directive('preselect', function($timeout) {
 		return {
 			link: function($scope, element, attrs) {
-				$scope.$watch('input', function() {
-					if (element.hasClass('ng-pristine')) {
-						element[0].select();
-					}
+				// Have to do $timeout, because DOM is not yet synced with $scope.
+				$timeout(function() {
+					element.select();
 				});
 			}
 		}
 	})
 	.controller('SlounikController', function($scope, $http) {
-		$scope.input = 'слоўнік';
+		$scope.input = localStorage.getItem('input') || 'слоўнік';
 		$scope.results = [];
 
 		// $scope.found to show/hide "not found" message.
@@ -20,6 +19,7 @@ angular.module('me.lazerka.slounik', [])
 		$scope.found = true;
 
 		$scope.$watch('input', function() {
+			localStorage.setItem('input', $scope.input);
 			if (!$scope.input) return;
 			$scope.searching = true;
 
@@ -36,7 +36,9 @@ angular.module('me.lazerka.slounik', [])
 			$scope.searching = false;
 
 			/** Divides response onto `match` and `rest`. */
-			function Lemma(lemma) {
+			function Translation(lemma, dict) {
+				this.lemma = lemma;
+
 				if (lemma.indexOf($scope.input) == 0) {
 					this.match = $scope.input;
 					this.rest = lemma.substr($scope.input.length);
@@ -44,24 +46,67 @@ angular.module('me.lazerka.slounik', [])
 					this.match = '';
 					this.rest = lemma;
 				}
+				this.dicts = [dict];
 			}
 
-			$scope.results = [];
-			$scope.results.input = requestedInput;
+			var rows = [];
+			var rowByLemma = {
+				ru: {},
+				be: {}
+			};
 			angular.forEach(response.data, function(res) {
-				var lemma = new Lemma(res.lemma);
+				var lemma = new Translation(res.lemma, res.dict);
 				var translations = res.translations.map(function(translation) {
-					return new Lemma(translation);
+					return new Translation(translation, res.dict);
 				});
 
-				var result = lemma.from == 'ru'
-					? {ru: [lemma], be: translations, arrow: '←'}
-					: {be: [lemma], ru: translations, arrow: '→'};
+				var row = {
+					ru: {
+						translations: res.from == 'ru' ? [lemma] : translations,
+						dict: null
+					},
+					be: {
+						translations: res.from == 'be' ? [lemma] : translations,
+						dict: null
+					},
+					arrow: res.from == 'ru' ? '←' : '→'
+				};
 
-				$scope.results.push(result);
+				var existingRow = rowByLemma[res.from][res.lemma];
+				if (existingRow) {
+					// Merge with existingRow
+					angular.forEach(['ru', 'be'], function(lang) {
+						var newTranslations = [];
+
+						angular.forEach(existingRow[lang].translations, function(translation) {
+							var newTranslation = row[lang].translations.filter(function(newTranslation) {
+								return newTranslation.lemma == translation.lemma;
+							})[0];
+
+							if (newTranslation) {
+								translation.dicts = translation.dicts.concat(newTranslation.dicts);
+							} else {
+								newTranslations = row[lang].translations;
+							}
+						});
+						existingRow[lang].translations = existingRow[lang].translations.concat(newTranslations);
+					});
+				} else {
+					rows.push(row);
+					rowByLemma[res.from][res.lemma] = row;
+				}
 			});
 
-			$scope.found = $scope.results.length > 0;
+			$scope.rows = rows;
+			$scope.found = rows.length > 0;
+
+			$scope.mouseOver = function(translation, row) {
+				row.dict = translation.dicts.join(', ');
+			};
+
+			$scope.mouseOut = function(row) {
+				row.dict = null;
+			};
 		}
 	})
 ;

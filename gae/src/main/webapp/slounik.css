@@ -18,7 +18,8 @@ html, body {
 }
 
 .results {
-	margin: 0 auto;
+	margin: 0;
+	width: 100%;
 }
 .results th {
 	color: gray;
@@ -26,7 +27,7 @@ html, body {
 
 .results .left,
 .results .right {
-	max-width: 47%;
+	width: 47%;
 	min-width: 13ex;
 }
 .results .left {
@@ -40,6 +41,13 @@ html, body {
 }
 .results .match {
 	text-decoration: underline;
+}
+.results .dict {
+	color: gray;
+	display: inline-block;
+}
+.results .translation {
+	display: inline-block;
 }
 
 .words .query {
