@@ -1,43 +1,34 @@
 package me.lazerka.slounik.gae;
 
-import com.googlecode.objectify.annotation.AlsoLoad;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 
 /**
+ * Currently created only manually.
+ *
  * @author Dzmitry Lazerka
  */
-@Entity(name = "Slounik")
+@Entity
 @Cache
 public class Dictionary {
 	@Id
+	@JsonProperty
+	private String id;
+
+	@JsonProperty
 	private String name;
 
-	@AlsoLoad("LangFrom")
-	private String langFrom;
+	@JsonProperty
+	private String url;
 
-	@AlsoLoad("LangTo")
-	private String langTo;
+	@JsonProperty
+	private String from;
+
+	@JsonProperty
+	private String to;
 
 	@SuppressWarnings("unused")
 	private Dictionary() {}
-
-	public Dictionary(String name, String langFrom, String langTo) {
-		this.name = name;
-		this.langFrom = langFrom;
-		this.langTo = langTo;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getLangFrom() {
-		return langFrom;
-	}
-
-	public String getLangTo() {
-		return langTo;
-	}
 }

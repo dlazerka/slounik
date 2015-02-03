@@ -10,6 +10,24 @@ angular.module('me.lazerka.slounik', [])
 			}
 		}
 	})
+/*
+	.factory('DictService', function() {
+		var dicts = {};
+
+		$http.get('/rest/dict/be/ru')
+			.then(function(response) {
+				angular.forEach(response.data, function(res) {
+					dicts[res.id] = dict;
+				});
+			});
+
+		return {
+			getDict : function(dictId) {
+				return dicts[dictId];
+			}
+		}
+	})
+*/
 	.controller('SlounikController', function($scope, $http) {
 		$scope.input = localStorage.getItem('input') || 'слоўнік';
 		$scope.results = [];
