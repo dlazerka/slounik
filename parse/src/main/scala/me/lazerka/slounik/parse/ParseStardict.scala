@@ -1,7 +1,12 @@
 package me.lazerka.slounik.parse
 
-import java.io.{File, FileInputStream, FileWriter}
-import java.nio.charset.StandardCharsets
+import java.io.ByteArrayInputStream
+import java.nio.{BufferUnderflowException, ByteBuffer}
+import java.nio.channels.FileChannel
+import java.nio.charset.StandardCharsets.UTF_8
+import java.nio.file.StandardOpenOption.{CREATE_NEW, WRITE}
+import java.nio.file._
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPInputStream
 
@@ -25,15 +30,12 @@ import scala.collection.mutable
  */
 object ParseStardict {
 	val logger: Logger = LoggerFactory.getLogger(this.getClass)
-	val utf8 = StandardCharsets.UTF_8
 
 	val lemmaPattern = "[А-Яа-яЎўІіЁё]|([А-Яа-яЎўІіЁё][а-яўіё' -]*[а-яўіё'!-])".r
 	val lemmaDeclarationPattern = s"$lemmaPattern( \\(?$lemmaPattern(, $lemmaPattern)*\\)?)?".r
 
 	/**
-	 * Usage: <pre>
-	 *     ParseStardict <path to .dict.dz file>
-	 * </pre>
+	 * Usage: ParseStardict &lt;langFrom&gt; &lt;langTo&gt; &lt;directory&gt;
 	 */
 	def main(args: Array[String]) = {
 		val stopwatch = Stopwatch.createStarted()
@@ -45,53 +47,66 @@ object ParseStardict {
 		val toLang = args(1)
 		val langsSorted = Array(fromLang, toLang).sorted.reduce(_ + _)
 
-		val dir = new File(args(2))
-		assert(dir.isDirectory)
-		traverse(dir)
+		val path = FileSystems.getDefault.getPath(args(2))
 
-		def traverse(dir: File): Unit = {
-			val nodes = dir.listFiles()
+		assert(Files.isDirectory(path))
+		Files.walkFileTree(path, new SimpleFileVisitor[Path] {
+			override def visitFile(file: Path, attrs: BasicFileAttributes) = {
+				super.visitFile(file, attrs)
 
-			nodes.filter(node => node.isFile && node.getName.endsWith(".dict.dz"))
-					.map(processDict)
+				if (file.toString.endsWith(".dict.dz")) {
+					processDict(file)
+				}
 
-			nodes.filter(_.isDirectory)
-					.map(traverse)
-		}
+				FileVisitResult.CONTINUE
+			}
+		})
+
 		logger.info("Parsed all in {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS))
 
-		def processDict(dictFile: File) {
-			logger.info("Parsing {}", dictFile.getAbsolutePath)
+		def processDict(dictFile: Path) {
+			logger.info("Parsing dict {}", dictFile)
 			val stopwatch = Stopwatch.createStarted()
-			val dictCode = dictFile.getName.replace(".dict.dz", "")
+			val dictCode = dictFile.getFileName.toString.replace(".dict.dz", "")
 
-			val dictContent: Array[Byte] = readDictFile(dictFile)
+			val dictContent: ByteBuffer = readDictFile(dictFile)
 
-			val idxFilePath = dictFile.getPath.replace(".dict.dz", ".idx")
-			val idx = readIdxFile(idxFilePath)
+			val idxFilePath = dictFile.getParent.resolve(dictCode + ".idx")
+			assert(Files.isReadable(idxFilePath), idxFilePath)
+			logger.info("Parsing idx {}", idxFilePath.toAbsolutePath)
+			val idx = ByteBuffer.wrap(Files.readAllBytes(idxFilePath))
+				.asReadOnlyBuffer()
 
-			val resultFilePath = dictFile.getPath.replace(".dict.dz", ".slounik")
-			val resultFile = new File(resultFilePath)
-			if (resultFile.exists()) {
-				logger.info("File {} exists, skipping", resultFile.getAbsolutePath)
+			val resultFile = dictFile.getParent.resolve(dictCode + ".slounik")
+			if (Files.exists(resultFile)) {
+				logger.info("File {} exists, skipping", resultFile.toAbsolutePath)
 				return
 			}
 
 			val lines = mutable.HashMap.empty[Array[String], String]
-			var i = 0
-			while (i < idx.size) {
-				val lemmaBytes = idx.slice(i, idx.indexOf('\u0000', i))
-				i += lemmaBytes.length + 1
+			while (idx.hasRemaining) {
+				// Reading lemma
+				val lemmaBuffer = idx.slice()
+				while (idx.get != 0) lemmaBuffer.get
+				lemmaBuffer.flip()
+				val lemmaBytes = new Array[Byte](lemmaBuffer.limit())
+				lemmaBuffer.get(lemmaBytes)
+				val lemma = new String(lemmaBytes, UTF_8)
 
-				val dict_offset = readInt(idx.slice(i, i + 4))
-				i += 4
-				val dict_size = readInt(idx.slice(i, i + 4))
-				i += 4
-				val lineBytes = dictContent.slice(dict_offset, dict_offset + dict_size)
-				val line = new String(lineBytes, utf8)
+				// Reading translation
+				val dictOffset = idx.getInt
+				val dictSize = idx.getInt
+				dictContent.position(dictOffset)
+				val lineBytes = new Array[Byte](dictSize)
+				try {
+					dictContent.get(lineBytes)
+				} catch {
+					case e: BufferUnderflowException => throw new Exception(
+						s"EOF while reading lemma $lemma, offset/size must be $dictOffset/$dictSize")
+				}
+				val line = new String(lineBytes, UTF_8)
 
-				val lemmaString = new String(lemmaBytes, utf8)
-				val lemmas = lemmaString
+				val lemmas = lemma
 						.split('(')
 						.flatMap(_.split(','))
 						.map(_.replace(')', ' ').trim)
@@ -135,48 +150,33 @@ object ParseStardict {
 					.filter(_._2._1.nonEmpty)
 					.flatMap(line => line._1.map(lemma => (lemma, line._2))) // flatten keys
 			if (parsed.isEmpty) {
-				logger.warn("Nothing parsed from {}", dictFile.getAbsolutePath)
+				logger.warn("Nothing parsed from {}", dictFile.toAbsolutePath)
 				return
 			}
-			val result = parsed
+			val result: String = parsed
 					.map(el => makeOutputLine(el._1, el._2._1, el._2._2))
 					.reduce((line1, line2) => line1 + '\n' + line2)
 
 			logger.info("Converted to string in {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS))
 			stopwatch.reset().start()
 
-			assert(!resultFile.exists(), s"Output file already exists: $resultFile")
-			val fw = new FileWriter(resultFile)
-			try {
-				fw.write(result)
-			} finally {
-				fw.close()
-			}
-			logger.info("Written to {} in {}ms", resultFile.getName, stopwatch.elapsed(TimeUnit.MILLISECONDS))
+
+			val fileChannel = FileChannel.open(resultFile, WRITE, CREATE_NEW)
+			fileChannel.write(ByteBuffer.wrap(result.getBytes(UTF_8)))
+			fileChannel.close()
+			logger.info("Written to {} in {}ms", resultFile.toAbsolutePath, stopwatch.elapsed(TimeUnit.MILLISECONDS))
 		}
 	}
 
-	def readDictFile(file: File): Array[Byte] = {
-		assert(file.canRead, file.getAbsolutePath)
+	def readDictFile(file: Path): ByteBuffer = {
+		assert(Files.isReadable(file), file.toAbsolutePath)
 
-		val zis = new GZIPInputStream(new FileInputStream(file))
+		val stream = new ByteArrayInputStream(Files.readAllBytes(file))
+		val zis = new GZIPInputStream(stream)
 		try {
-			IOUtils.readFully(zis, -1, true)
+			ByteBuffer.wrap(IOUtils.readFully(zis, -1, true)).asReadOnlyBuffer()
 		} finally {
 			zis.close()
-		}
-	}
-
-	def readIdxFile(fileName: String): Array[Byte] = {
-		val file = new File(fileName)
-		assert(file.canRead)
-		logger.info("Parsing {}", file.getAbsolutePath)
-
-		val is = new FileInputStream(file)
-		try {
-			IOUtils.readFully(is, file.length().toInt, true)
-		} finally {
-			is.close()
 		}
 	}
 
