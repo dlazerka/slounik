@@ -31,8 +31,6 @@ import scala.collection.mutable
 object ParseStardict {
 	val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
-	val lemmaPattern = "[А-Яа-яЎўІіЁё]|([А-Яа-яЎўІіЁё][а-яўіё' -]*[а-яўіё'!-])".r
-	val lemmaDeclarationPattern = s"$lemmaPattern( \\(?$lemmaPattern(, $lemmaPattern)*\\)?)?".r
 
 	/**
 	 * Usage: ParseStardict &lt;langFrom&gt; &lt;langTo&gt; &lt;directory&gt;
@@ -79,8 +77,8 @@ object ParseStardict {
 
 			val resultFile = dictFile.getParent.resolve(dictCode + ".slounik")
 			if (Files.exists(resultFile)) {
-				logger.info("File {} exists, skipping", resultFile.toAbsolutePath)
-				return
+//				logger.info("File {} exists, skipping", resultFile.toAbsolutePath)
+//				return
 			}
 
 			val lines = mutable.HashMap.empty[Array[String], String]
@@ -111,7 +109,7 @@ object ParseStardict {
 						.flatMap(_.split(','))
 						.map(_.replace(')', ' ').trim)
 						.filter(lemma => {
-					if (lemmaPattern.pattern.matcher(lemma).matches()) {
+					if (EntryParser.lemmaPattern.pattern.matcher(lemma).matches()) {
 						true
 					} else {
 						println(s"Skipped lemma: $lemma")
@@ -146,7 +144,7 @@ object ParseStardict {
 
 			val parsed = lines
 					.par // With par it's 3x-10x faster
-					.mapValues(parseLine)
+					.mapValues(EntryParser.parseLine)
 					.filter(_._2._1.nonEmpty)
 					.flatMap(line => line._1.map(lemma => (lemma, line._2))) // flatten keys
 			if (parsed.isEmpty) {
@@ -190,50 +188,4 @@ object ParseStardict {
 		}
 	}
 
-	val underline = "<u>|</u>".r
-	val spaces = "\\s+".r
-	val wordCap = "[А-ЯЎІЁ][а-яўіё'-]+"
-	val wordNocase = "[0-9A-Za-zА-ЯЎІЁа-яўіё'!.–-]+"
-	val multiWordCommas = "(?:" + wordNocase + "(?:[ ,]+))+" + wordNocase
-	val multiword = "(?:" + wordNocase + "(?:[ ]+))+" + wordNocase
-	val drop = Array(
-		"""\([^\)]+?\)""",
-		"""<i>род\.</i> [^ <]+""",
-		"""<b>\s*""" + multiWordCommas + """\s*</b>.*?(?:<br>|$)""",
-		"<b>.*?</b>",
-		"<i>.*?</i>",
-		" -[^ ,;<]+",
-		"""(?s)\(.*?\)""",
-		"(?s)<a .*?</a>",
-		" +-+ +",
-		"""[а-я0-9]\)""",
-		multiword,
-		"<br>",
-		"[0-9,;:◊!?.«»°—]+",
-		"[0-9°]+",
-		wordCap
-	)
-	val dropPatterns = drop.map(_.r())
-
-	def parseLine(line: String): (Array[String], String) = {
-		var cleared = underline.replaceAllIn(line, "")
-
-		// Not foldLeft() for debugging.
-		dropPatterns.foreach(regex => {
-			cleared = regex.replaceAllIn(cleared, " ")
-		})
-		val lemmas = spaces.split(cleared.trim)
-				.filter(!_.isEmpty)
-				.distinct
-		if (lemmas.isEmpty) {
-			println(s"Nothing parsed from line $line")
-		}
-		val result = lemmas.filter ({
-			case lemmaPattern(_*) => true
-			case lemma =>
-				println(s"Skipped $lemma in $line")
-				false
-		})
-		(result, line)
-	}
 }
