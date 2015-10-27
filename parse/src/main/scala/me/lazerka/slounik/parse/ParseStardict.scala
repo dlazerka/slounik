@@ -1,12 +1,10 @@
 package me.lazerka.slounik.parse
 
 import java.io.ByteArrayInputStream
-import java.nio.{BufferUnderflowException, ByteBuffer}
-import java.nio.channels.FileChannel
 import java.nio.charset.StandardCharsets.UTF_8
-import java.nio.file.StandardOpenOption.{CREATE_NEW, WRITE}
 import java.nio.file._
 import java.nio.file.attribute.BasicFileAttributes
+import java.nio.{BufferUnderflowException, ByteBuffer}
 import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPInputStream
 
@@ -30,7 +28,6 @@ import scala.collection.mutable
  */
 object ParseStardict {
 	val logger: Logger = LoggerFactory.getLogger(this.getClass)
-
 
 	/**
 	 * Usage: ParseStardict &lt;langFrom&gt; &lt;langTo&gt; &lt;directory&gt;
@@ -75,11 +72,8 @@ object ParseStardict {
 			val idx = ByteBuffer.wrap(Files.readAllBytes(idxFilePath))
 				.asReadOnlyBuffer()
 
-			val resultFile = dictFile.getParent.resolve(dictCode + ".slounik")
-			if (Files.exists(resultFile)) {
-//				logger.info("File {} exists, skipping", resultFile.toAbsolutePath)
-//				return
-			}
+			val outFile = dictFile.getParent.resolve(dictCode + ".slounik")
+			val writer = new Writer(outFile, langsSorted, fromLang, dictCode)
 
 			val lines = mutable.HashMap.empty[Array[String], String]
 			while (idx.hasRemaining) {
@@ -120,26 +114,6 @@ object ParseStardict {
 			}
 			logger.info("Read {} lines in {}ms", lines.size, stopwatch.elapsed(TimeUnit.MILLISECONDS))
 
-			def makeOutputLine(lemma: String, translations: Array[String], line: String): String = {
-				try {
-					assume(!line.contains('↵'), line) // lines separator
-					val line2 = line.replace('\n', '↵')
-					assume(!lemma.contains('|'), line) // Separates parts of key
-					assume(!translations.exists(_.contains('|')), translations) // Separates translations from dictCode
-					assume(!translations.exists(_.contains('&')), translations) // Separates translations from each other
-
-					val to: String = translations.reduce(_ + '&' + _)
-
-					val key: String = s"$langsSorted|$lemma|$fromLang|$to|$dictCode"
-					assume(key.length < 500, line) // due to GAE restriction on key length
-					s"$key:$line2"
-				} catch {
-					case e: Exception =>
-						logger.error(s"Unable to make output line of: $line")
-						throw e
-				}
-			}
-
 			stopwatch.reset().start()
 
 			val parsed = lines
@@ -151,18 +125,8 @@ object ParseStardict {
 				logger.warn("Nothing parsed from {}", dictFile.toAbsolutePath)
 				return
 			}
-			val result: String = parsed
-					.map(el => makeOutputLine(el._1, el._2._1, el._2._2))
-					.reduce((line1, line2) => line1 + '\n' + line2)
 
-			logger.info("Converted to string in {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS))
-			stopwatch.reset().start()
-
-
-			val fileChannel = FileChannel.open(resultFile, WRITE, CREATE_NEW)
-			fileChannel.write(ByteBuffer.wrap(result.getBytes(UTF_8)))
-			fileChannel.close()
-			logger.info("Written to {} in {}ms", resultFile.toAbsolutePath, stopwatch.elapsed(TimeUnit.MILLISECONDS))
+			writer.write(parsed)
 		}
 	}
 
@@ -177,15 +141,4 @@ object ParseStardict {
 			zis.close()
 		}
 	}
-
-	/** Reads 4 bytes and converts them to int. */
-	def readInt(took: Array[Byte]): Int = {
-		try {
-			// Not using take() as it breaks iterator, see doc.
-			took.foldLeft(0)((a, b) => (a << 8) | (b & 0x7f) | (b & 0x80))
-		} catch {
-			case e: NoSuchElementException => throw new RuntimeException("EOF while integer expected", e)
-		}
-	}
-
 }
