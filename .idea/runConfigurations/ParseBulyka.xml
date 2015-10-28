@@ -6,7 +6,7 @@
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
-    <option name="MAIN_CLASS_NAME" value="me.lazerka.slounik.parse.ParseStardict" />
+    <option name="MAIN_CLASS_NAME" value="me.lazerka.slounik.parse.ConvertStardict" />
     <option name="VM_PARAMETERS" value="" />
     <option name="PROGRAM_PARAMETERS" value="be ru $PROJECT_DIR$/data/stardict/be-ru/bulykabr/" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />

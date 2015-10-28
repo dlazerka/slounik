@@ -1,11 +1,9 @@
 package me.lazerka.slounik.parse
 
-import scala.util.parsing.combinator._
-
 /**
  * @author Dzmitry Lazerka
  */
-object EntryParser extends RegexParsers {
+object EntryParser {
 	val lemmaPattern = "[А-Яа-яЎўІіЁё]|([А-Яа-яЎўІіЁё][а-яўіё' -]*[а-яўіё'!-])".r
 	val lemmaDeclarationPattern = s"$lemmaPattern( \\(?$lemmaPattern(, $lemmaPattern)*\\)?)?".r
 
