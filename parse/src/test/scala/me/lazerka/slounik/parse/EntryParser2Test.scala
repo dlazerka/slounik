@@ -61,7 +61,7 @@ class EntryParser2Test extends FreeSpec with Matchers {
 				"правление",
 				"управление"))
 		}
-/*
+
 		"ух" in {
 			val result = EntryParser2.parseLine(
 	            """|<b>ух</b> <i>межд.</i><br>
@@ -73,19 +73,16 @@ class EntryParser2Test extends FreeSpec with Matchers {
 		           |""".stripMargin)
 
 			result.isDefined shouldBe true
-			result.get shouldBe Entry("ух", Set(
-				"ух",
-				"руководство",
-				"правление",
-				"управление"))
+			result.get shouldBe Entry("ух", Set("ух"))
 		}
-*/
+
 		"debug" in {
 			val line =
-				"""| <i>лінгв.</i>
+				"""|<b>3.</b> <i>(при выражении резкого низкого звука от удара, выстрела)</i> ух <br>
+ 				   |<b>ух! - раздался глухой удар</b> ух! - раздаўся глухі ўдар
 				   |""".stripMargin
 
-			parseAll(hint, line) match {
+			parseAll(variantB, line) match {
 				case Success(matched, input) =>
 					println(matched)
 				case NoSuccess(msg, next) =>

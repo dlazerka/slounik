@@ -12,28 +12,36 @@ object EntryParser2 extends RegexParsers {
 	val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
 	val word = """[А-Яа-яЎўІіЁё][а-яўіё'-]*!?""".r
-	val shortenedWord = """[а-яўіё'-]+\.""".r
 	val phrase = rep1(word) ^^ { words => words.mkString(" ") }
+	val wordComma = """[А-Яа-яЎўІіЁё][а-яўіё']*,""".r
+	val words = rep1(wordComma | word) ^^ {_.mkString(" ")}
+	val phrasePunctuated = words ~ rep("-" ~ words) ^^ { case w ~ ws => w + " " + ws.mkString(" ") }
+
 	val phrases = rep1sep(phrase, opt(", " | ";"))
 
-	val mainLemma = "<b>" ~> phrase <~ "</b>"
+	val hint = """<i>[а-яўіё]+\.</i>""".r
+
+	val mainLemma = "<b>" ~> phrase <~ "</b>" <~ (hint ?)
+	val mainLemmaPunctuated = "<b>" ~> phrasePunctuated <~ "</b>"
 
 	val simple = mainLemma ~ "—" ~ phrases ^^ { case m ~ t ~ ls => Entry(m, ls.toSet) }
 
-//	val usageHint = "(<i>" ~> phrases <~ "</i>)" <~ opt(")")
-//	val usageHint = ("(<i>" | "<i>(") ~> phrases <~ (")</i>" | "</i>") <~ opt(")")
-
-	val hint = """<i>[а-яўіё]+\.</i>""".r
-	val translations = (hint ?) ~> phrases
-
 	// Parentheses and italic opener can be misplaced, see `асадка` test.
-	val usageHint = """\(?<i>\(?""".r ~> phrases <~ """\)?</i>\)?\)?""".r
 	// Extra parentheses opener can be at the end, see `папячы` test.
-	val variant = """[0-9]+\)""".r ~> translations <~ (usageHint ?)
+	val usageHint = """\(?<i>\(?""".r ~> phrases <~ """\)?</i>\)?\)?""".r
 
+	val translations = (hint ?) ~> phrases <~ (usageHint ?)
+
+	val variant = """[0-9]+\)""".r ~> translations
 	val variants = rep1sep(variant, ";" ?)
 
-	val multi = mainLemma ~ "—" ~ variants ^^ { case l ~ t ~ v => Entry(l, v.flatten.toSet) }
+	val example = "<br>" ~ mainLemmaPunctuated ~ phrasePunctuated
+	val variantB = """<b>[0-9]+\.</b>""".r ~> opt(usageHint) ~> phrases <~ rep(example)
+	val variantsB = rep1sep(variantB, "<br>")
+
+	val rest = ("—" ~> variants) | ("<br>" ~> variantsB)
+
+	val multi = mainLemma ~ rest ^^ { case l ~ v => Entry(l, v.flatten.toSet) }
 	val global = simple | multi
 
 	def parseLine(line: String): Option[Entry] =
