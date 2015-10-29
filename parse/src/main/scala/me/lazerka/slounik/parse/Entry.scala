@@ -3,4 +3,4 @@ package me.lazerka.slounik.parse
 /**
  * @author Dzmitry Lazerka
  */
-case class Entry(lemma: Phrase, translations: Set[Phrase])
+case class Entry(lemma: String, translations: Set[String])

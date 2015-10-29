@@ -13,7 +13,7 @@ object EntryParser2 extends RegexParsers {
 
 	val word = """[А-Яа-яЎўІіЁё][а-яўіё'-]*!?""".r
 	val shortenedWord = """[а-яўіё'-]+\.""".r
-	val phrase = rep1(word) ^^ { words => new Phrase(words.mkString(" ")) }
+	val phrase = rep1(word) ^^ { words => words.mkString(" ") }
 	val phrases = rep1sep(phrase, opt(", " | ";"))
 
 	val mainLemma = "<b>" ~> phrase <~ "</b>"

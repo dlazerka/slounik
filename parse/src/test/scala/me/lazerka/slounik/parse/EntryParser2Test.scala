@@ -11,7 +11,7 @@ class EntryParser2Test extends FreeSpec with Matchers {
 		"встрепать" in {
 			val result = EntryParser2.parseLine("<b>встрепать</b> — ускудлаціць, узлахмаціць")
 			result.isDefined shouldBe true
-			result.get shouldBe Entry(Phrase("встрепать"), Set(Phrase("ускудлаціць"), Phrase("узлахмаціць")))
+			result.get shouldBe Entry("встрепать", Set("ускудлаціць", "узлахмаціць"))
 		}
 
 		"папячы" in {
@@ -22,13 +22,13 @@ class EntryParser2Test extends FreeSpec with Matchers {
 	               | 3) попечь, пожарить (<i>некоторое время</i>)
 	               |""".stripMargin)
 			result.isDefined shouldBe true
-			result.get shouldBe Entry(Phrase("папячы"), Set(
-				Phrase("испечь"),
-				Phrase("изжарить"),
-				Phrase("обжечь"),
-				Phrase("опалить"),
-				Phrase("попечь"),
-				Phrase("пожарить")))
+			result.get shouldBe Entry("папячы", Set(
+				"испечь",
+				"изжарить",
+				"обжечь",
+				"опалить",
+				"попечь",
+				"пожарить"))
 		}
 
 		"асадка" in {
@@ -40,13 +40,13 @@ class EntryParser2Test extends FreeSpec with Matchers {
 			       | 4) <i>уст.</i> ручка <i>(письменная принадлежность</i>)
 			       |""".stripMargin)
 			result.isDefined shouldBe true
-			result.get shouldBe Entry(Phrase("асадка"), Set(
-				Phrase("насадка"),
-				Phrase("присадка"),
-				Phrase("оправка"),
-				Phrase("обрамление"),
-				Phrase("установка"),
-				Phrase("ручка")))
+			result.get shouldBe Entry("асадка", Set(
+				"насадка",
+				"присадка",
+				"оправка",
+				"обрамление",
+				"установка",
+				"ручка"))
 		}
 
 		"кіраванне" in {
@@ -55,11 +55,11 @@ class EntryParser2Test extends FreeSpec with Matchers {
 		           |""".stripMargin)
 
 			result.isDefined shouldBe true
-			result.get shouldBe Entry(Phrase("кіраванне"), Set(
-				Phrase("управление"),
-				Phrase("руководство"),
-				Phrase("правление"),
-				Phrase("управление")))
+			result.get shouldBe Entry("кіраванне", Set(
+				"управление",
+				"руководство",
+				"правление",
+				"управление"))
 		}
 /*
 		"ух" in {
@@ -73,11 +73,11 @@ class EntryParser2Test extends FreeSpec with Matchers {
 		           |""".stripMargin)
 
 			result.isDefined shouldBe true
-			result.get shouldBe Entry(Phrase("ух"), Set(
-				Phrase("ух"),
-				Phrase("руководство"),
-				Phrase("правление"),
-				Phrase("управление")))
+			result.get shouldBe Entry("ух", Set(
+				"ух",
+				"руководство",
+				"правление",
+				"управление"))
 		}
 */
 		"debug" in {
