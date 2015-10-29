@@ -2,6 +2,7 @@ package me.lazerka.slounik.parse
 
 import org.slf4j.{LoggerFactory, Logger}
 
+import scala.language.postfixOps
 import scala.util.parsing.combinator._
 
 /**
@@ -10,24 +11,33 @@ import scala.util.parsing.combinator._
 object EntryParser2 extends RegexParsers {
 	val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
-	val word = "[А-Яа-яЎўІіЁё][а-яўіё'-]*!?".r
-	val phrase = rep1(word) ^^ { words => new Lemma(words.mkString(" ")) }
-	val phrases = rep1sep(phrase, ", ")
+	val word = """[А-Яа-яЎўІіЁё][а-яўіё'-]*!?""".r
+	val shortenedWord = """[а-яўіё'-]+\.""".r
+	val phrase = rep1(word) ^^ { words => new Phrase(words.mkString(" ")) }
+	val phrases = rep1sep(phrase, opt(", " | ";"))
 
 	val mainLemma = "<b>" ~> phrase <~ "</b>"
-	val simple = mainLemma ~ "—" ~ phrases ^^ { case m ~ t ~ ls => Entry(m, ls) }
 
-	val italicPhrases = "<i>" ~> phrases <~ "</i>"
-	val usageHint = "(" ~> italicPhrases <~ ")" <~ opt(")")
+	val simple = mainLemma ~ "—" ~ phrases ^^ { case m ~ t ~ ls => Entry(m, ls.toSet) }
 
-	val variant = """[0-9]+\)""".r ~> phrases <~ usageHint
-	val variants = rep1sep(variant, ";")
+//	val usageHint = "(<i>" ~> phrases <~ "</i>)" <~ opt(")")
+//	val usageHint = ("(<i>" | "<i>(") ~> phrases <~ (")</i>" | "</i>") <~ opt(")")
 
-	val multi = mainLemma ~ "—" ~ variants ^^ { case l ~ t ~ v => Entry(l, v.flatten) }
+	val hint = """<i>[а-яўіё]+\.</i>""".r
+	val translations = (hint ?) ~> phrases
+
+	// Parentheses and italic opener can be misplaced, see `асадка` test.
+	val usageHint = """\(?<i>\(?""".r ~> phrases <~ """\)?</i>\)?\)?""".r
+	// Extra parentheses opener can be at the end, see `папячы` test.
+	val variant = """[0-9]+\)""".r ~> translations <~ (usageHint ?)
+
+	val variants = rep1sep(variant, ";" ?)
+
+	val multi = mainLemma ~ "—" ~ variants ^^ { case l ~ t ~ v => Entry(l, v.flatten.toSet) }
 	val global = simple | multi
 
 	def parseLine(line: String): Option[Entry] =
-		parse(global, line) match {
+		parseAll(global, line) match {
 			case Success(matched, input) =>
 				Some(matched)
 			case Failure(msg, _) =>

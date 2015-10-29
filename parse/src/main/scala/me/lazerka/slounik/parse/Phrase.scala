@@ -3,4 +3,4 @@ package me.lazerka.slounik.parse
 /**
  * @author Dzmitry Lazerka
  */
-case class Lemma(value: String)
+case class Phrase(value: String)
