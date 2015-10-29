@@ -5,14 +5,14 @@ import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file._
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.{BufferUnderflowException, ByteBuffer}
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.zip.GZIPInputStream
 
 import com.google.common.base.Stopwatch
-import org.slf4j.{Logger, LoggerFactory}
 import sun.misc.IOUtils
 
 import scala.collection.mutable
+import scala.collection.parallel.ParMap
 
 /**
  * This code is kinda dirty, but that's OK.
@@ -42,14 +42,6 @@ object ConvertStardict {
 
 		val path = FileSystems.getDefault.getPath(args(2))
 
-		converter.convert(path)
-	}
-}
-
-class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
-	val logger: Logger = LoggerFactory.getLogger(this.getClass)
-
-	def convert(path: Path) = {
 		val stopwatch = Stopwatch.createStarted()
 
 		assert(Files.isDirectory(path))
@@ -58,18 +50,20 @@ class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
 				super.visitFile(file, attrs)
 
 				if (file.toString.endsWith(".dict.dz")) {
-					processDict(file)
+					converter.processDict(file)
 				}
 
 				FileVisitResult.CONTINUE
 			}
 		})
 
-		logger.info("Total {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS))
+		println(s"Total ${stopwatch.elapsed(MILLISECONDS)}ms")
 	}
+}
 
+class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
 	def processDict(dictFile: Path) {
-		logger.info("Parsing dict {}", dictFile)
+		println(s"Parsing dict $dictFile")
 		val stopwatch = Stopwatch.createStarted()
 		val dictCode = dictFile.getFileName.toString.replace(".dict.dz", "")
 
@@ -77,7 +71,7 @@ class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
 
 		val idxFilePath = dictFile.getParent.resolve(dictCode + ".idx")
 		assert(Files.isReadable(idxFilePath), idxFilePath)
-		logger.info("Parsing idx {}", idxFilePath.toAbsolutePath)
+		println(s"Parsing idx ${idxFilePath.toAbsolutePath}")
 		val idx = ByteBuffer.wrap(Files.readAllBytes(idxFilePath))
 				.asReadOnlyBuffer()
 
@@ -118,22 +112,23 @@ class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
 			})
 			lines.put(lemmas, line)
 		}
-		logger.info("Read {} lines in {}ms", lines.size, stopwatch.elapsed(TimeUnit.MILLISECONDS))
+		println(s"Read ${lines.size} lines in ${stopwatch.elapsed(MILLISECONDS)}ms")
 
-		val parsed = lines
+		val values: ParMap[Array[String], (Array[String], String)] = lines
 				.par // With par it's 3x-10x faster
 				.mapValues(EntryParser.parseLine)
+		val parsed = values
 				.filter(_._2._1.nonEmpty)
 				.flatMap(line => line._1.map(lemma => (lemma, line._2))) // flatten keys
 		if (parsed.isEmpty) {
-			logger.warn("Nothing parsed from {}", dictFile.toAbsolutePath)
+			println(s"Nothing parsed from ${dictFile.toAbsolutePath}")
 			return
 		}
 
 		val outFile = dictFile.getParent.resolve(dictCode + ".slounik")
-		val writer = new Writer(outFile, langsSorted, fromLang, dictCode)
+		val writer = new Writer(langsSorted, fromLang, dictCode)
 
-		writer.write(parsed)
+		writer.write(parsed, outFile)
 	}
 
 	def readDictFile(file: Path): ByteBuffer = {

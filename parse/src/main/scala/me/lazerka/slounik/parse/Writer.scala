@@ -15,10 +15,10 @@ import scala.collection.parallel.ParMap
 /**
  * @author Dzmitry Lazerka
  */
-class Writer(outFile: Path, langsSorted: String, fromLang: String, dictCode: String) {
+class Writer(langsSorted: String, fromLang: String, dictCode: String) {
 	val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
-	def write(parsed: ParMap[String, (Array[String], String)]) = {
+	def write(parsed: ParMap[String, (Array[String], String)], outFile: Path) = {
 		val fileChannel = FileChannel.open(outFile, WRITE, CREATE)
 		val stopwatch = Stopwatch.createStarted()
 
