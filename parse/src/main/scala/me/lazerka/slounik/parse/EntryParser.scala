@@ -32,7 +32,7 @@ object EntryParser {
 	)
 	val dropPatterns = drop.map(_.r())
 
-	def parseLine(line: String): Array[String] = {
+	def parseLine(line: String): Option[Entry] = {
 		var cleared = underline.replaceAllIn(line, "")
 
 		// Not foldLeft() for debugging.
@@ -40,16 +40,21 @@ object EntryParser {
 			cleared = regex.replaceAllIn(cleared, " ")
 		})
 		val lemmas = spaces.split(cleared.trim)
-				.filter(!_.isEmpty)
 				.distinct
+				.filter(!_.isEmpty)
 		if (lemmas.isEmpty) {
 			println(s"Nothing parsed from line $line")
 		}
-		lemmas.filter ({
+		val translations = lemmas.filter({
 			case lemmaPattern(_*) => true
 			case lemma =>
 				println(s"Skipped $lemma in $line")
 				false
 		})
+		if (translations.nonEmpty) {
+			Some(Entry("", translations))
+		} else {
+			None
+		}
 	}
 }

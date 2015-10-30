@@ -115,7 +115,10 @@ class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
 
 		val parsed = lines
 				.map(pair => (pair._1, EntryParser.parseLine(pair._2), pair._2))
-				.filter(_._2.nonEmpty)
+				.collect{
+					case (lemma: String, entry: Some[Entry], line: String) =>
+						(Entry(lemma, entry.get.translations),line)
+				}
 		if (parsed.isEmpty) {
 			println(s"Nothing parsed from ${dictFile.toAbsolutePath}")
 			return

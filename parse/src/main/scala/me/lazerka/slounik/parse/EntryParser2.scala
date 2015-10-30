@@ -21,7 +21,7 @@ object EntryParser2 extends RegexParsers {
 	val mainLemma = "<b>" ~> phrase <~ "</b>" <~ (hint ?)
 	val mainLemmaPunctuated = "<b>" ~> phrasePunctuated <~ "</b>"
 
-	val simple = mainLemma ~ "—" ~ phrases ^^ { case m ~ t ~ ls => Entry(m, ls.toSet) }
+	val simple = mainLemma ~ "—" ~ phrases ^^ { case m ~ t ~ ls => Entry(m, ls.distinct) }
 
 	// Parentheses and italic opener can be misplaced, see `асадка` test.
 	// Extra parentheses opener can be at the end, see `папячы` test.
@@ -38,7 +38,7 @@ object EntryParser2 extends RegexParsers {
 
 	val rest = ("—" ~> variants) | ("<br>" ~> variantsB)
 
-	val multi = mainLemma ~ rest ^^ { case l ~ v => Entry(l, v.flatten.toSet) }
+	val multi = mainLemma ~ rest ^^ { case l ~ v => Entry(l, v.flatten.distinct) }
 	val global = simple | multi
 
 	def parseLine(line: String): Option[Entry] =

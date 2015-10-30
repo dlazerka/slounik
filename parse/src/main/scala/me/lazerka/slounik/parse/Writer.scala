@@ -13,14 +13,14 @@ import com.google.common.base.Stopwatch
  * @author Dzmitry Lazerka
  */
 class Writer(langsSorted: String, fromLang: String, dictCode: String) {
-	def write(parsed: Vector[(String, Array[String], String)], outFile: Path) = {
+	def write(parsed: Vector[(Entry, String)], outFile: Path) = {
 		val fileChannel = FileChannel.open(outFile, WRITE, CREATE)
 		val stopwatch = Stopwatch.createStarted()
 
 		try {
 			val result = parsed
-					.map(el => makeOutputLine(el._1, el._2, el._3))
 					.seq
+					.map(el => makeOutputLine(el._1, el._2))
 					.sorted
 					.mkString("\n")
 
@@ -35,17 +35,17 @@ class Writer(langsSorted: String, fromLang: String, dictCode: String) {
 		println(s"Written to ${outFile.toAbsolutePath} in ${stopwatch.elapsed(TimeUnit.MILLISECONDS)}ms")
 	}
 
-	def makeOutputLine(lemma: String, translations: Array[String], line: String): String = {
+	def makeOutputLine(entry: Entry, line: String): String = {
 		try {
 			assume(!line.contains('↵'), line) // lines separator
 			val line2 = line.replace('\n', '↵')
-			assume(!lemma.contains('|'), line) // Separates parts of key
-			assume(!translations.exists(_.contains('|')), translations) // Separates translations from dictCode
-			assume(!translations.exists(_.contains('&')), translations) // Separates translations from each other
+			assume(!entry.lemma.contains('|'), line) // Separates parts of key
+			assume(!entry.translations.exists(_.contains('|')), entry) // Separates translations from dictCode
+			assume(!entry.translations.exists(_.contains('&')), entry) // Separates translations from each other
 
-			val to: String = translations.reduce(_ + '&' + _)
+			val to: String = entry.translations.mkString("&")
 
-			val key: String = s"$langsSorted|$lemma|$fromLang|$to|$dictCode"
+			val key: String = s"$langsSorted|${entry.lemma}|$fromLang|$to|$dictCode"
 			assume(key.length < 500, line) // due to GAE restriction on key length
 			s"$key:$line2"
 		} catch {
