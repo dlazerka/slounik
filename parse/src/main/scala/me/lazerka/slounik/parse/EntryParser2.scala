@@ -1,7 +1,5 @@
 package me.lazerka.slounik.parse
 
-import org.slf4j.{LoggerFactory, Logger}
-
 import scala.language.postfixOps
 import scala.util.parsing.combinator._
 
@@ -9,7 +7,6 @@ import scala.util.parsing.combinator._
  * @author Dzmitry Lazerka
  */
 object EntryParser2 extends RegexParsers {
-	val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
 	val word = """[А-Яа-яЎўІіЁё][а-яўіё'-]*!?""".r
 	val phrase = rep1(word) ^^ { words => words.mkString(" ") }
@@ -49,10 +46,10 @@ object EntryParser2 extends RegexParsers {
 			case Success(matched, input) =>
 				Some(matched)
 			case Failure(msg, _) =>
-				logger.info(s"Failure: $msg")
+				println(s"Failure: $msg")
 				None
 			case Error(msg, _) =>
-				logger.error(s"Error: $msg")
+				println(s"Error: $msg")
 				None
 		}
 }

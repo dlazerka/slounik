@@ -49,16 +49,6 @@
 		</dependency>
 
 		<!-- Logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.9</version>
-		</dependency>
-		<dependency> <!-- Redirect to JUL, because GAE. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
-			<version>1.7.9</version>
-		</dependency>
 
 		<!-- Testing -->
 		<dependency>
