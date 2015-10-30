@@ -8,26 +8,23 @@ import java.nio.file.StandardOpenOption._
 import java.util.concurrent.TimeUnit
 
 import com.google.common.base.Stopwatch
-import org.slf4j.{Logger, LoggerFactory}
-
-import scala.collection.parallel.ParMap
 
 /**
  * @author Dzmitry Lazerka
  */
 class Writer(langsSorted: String, fromLang: String, dictCode: String) {
-	val logger: Logger = LoggerFactory.getLogger(this.getClass)
-
-	def write(parsed: ParMap[String, (Array[String], String)], outFile: Path) = {
+	def write(parsed: Vector[(String, Array[String], String)], outFile: Path) = {
 		val fileChannel = FileChannel.open(outFile, WRITE, CREATE)
 		val stopwatch = Stopwatch.createStarted()
 
 		try {
-			val result: String = parsed
-					.map(el => makeOutputLine(el._1, el._2._1, el._2._2))
-					.reduce((line1, line2) => line1 + '\n' + line2)
+			val result = parsed
+					.map(el => makeOutputLine(el._1, el._2, el._3))
+					.seq
+					.sorted
+					.mkString("\n")
 
-			logger.info("Converted to string in {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS))
+			println(s"Converted to string in ${stopwatch.elapsed(TimeUnit.MILLISECONDS)}ms")
 			stopwatch.reset().start()
 
 			fileChannel.write(ByteBuffer.wrap(result.getBytes(UTF_8)))
@@ -35,7 +32,7 @@ class Writer(langsSorted: String, fromLang: String, dictCode: String) {
 			fileChannel.close()
 		}
 
-		logger.info("Written to {} in {}ms", outFile.toAbsolutePath, stopwatch.elapsed(TimeUnit.MILLISECONDS))
+		println(s"Written to ${outFile.toAbsolutePath} in ${stopwatch.elapsed(TimeUnit.MILLISECONDS)}ms")
 	}
 
 	def makeOutputLine(lemma: String, translations: Array[String], line: String): String = {
@@ -53,7 +50,7 @@ class Writer(langsSorted: String, fromLang: String, dictCode: String) {
 			s"$key:$line2"
 		} catch {
 			case e: Exception =>
-				logger.error(s"Unable to make output line of: $line")
+				sys.error(s"Unable to make output line of: $line")
 				throw e
 		}
 	}

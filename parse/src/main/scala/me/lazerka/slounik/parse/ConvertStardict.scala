@@ -11,9 +11,6 @@ import java.util.zip.GZIPInputStream
 import com.google.common.base.Stopwatch
 import sun.misc.IOUtils
 
-import scala.collection.mutable
-import scala.collection.parallel.ParMap
-
 /**
  * This code is kinda dirty, but that's OK.
  *
@@ -44,7 +41,7 @@ object ConvertStardict {
 
 		val stopwatch = Stopwatch.createStarted()
 
-		assert(Files.isDirectory(path))
+		assert(Files.isDirectory(path), path.toString)
 		Files.walkFileTree(path, new SimpleFileVisitor[Path] {
 			override def visitFile(file: Path, attrs: BasicFileAttributes) = {
 				super.visitFile(file, attrs)
@@ -75,7 +72,7 @@ class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
 		val idx = ByteBuffer.wrap(Files.readAllBytes(idxFilePath))
 				.asReadOnlyBuffer()
 
-		val lines = mutable.HashMap.empty[Array[String], String]
+		val linesBuilder = Vector.newBuilder[(String, String)]
 		while (idx.hasRemaining) {
 			// Reading lemma
 			val lemmaBuffer = idx.slice()
@@ -110,16 +107,15 @@ class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
 					false
 				}
 			})
-			lines.put(lemmas, line)
+
+			lemmas.foreach(lemma => linesBuilder += ((lemma, line)))
 		}
+		val lines = linesBuilder.result()
 		println(s"Read ${lines.size} lines in ${stopwatch.elapsed(MILLISECONDS)}ms")
 
-		val values: ParMap[Array[String], (Array[String], String)] = lines
-				.par // With par it's 3x-10x faster
-				.mapValues(EntryParser.parseLine)
-		val parsed = values
-				.filter(_._2._1.nonEmpty)
-				.flatMap(line => line._1.map(lemma => (lemma, line._2))) // flatten keys
+		val parsed = lines
+				.map(pair => (pair._1, EntryParser.parseLine(pair._2), pair._2))
+				.filter(_._2.nonEmpty)
 		if (parsed.isEmpty) {
 			println(s"Nothing parsed from ${dictFile.toAbsolutePath}")
 			return
