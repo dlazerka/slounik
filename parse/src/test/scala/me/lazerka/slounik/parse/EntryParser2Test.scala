@@ -70,15 +70,20 @@ class EntryParser2Test extends FreeSpec with Matchers {
 		result shouldBe Entry("ух", Seq("ух"))
 	}
 
+	"абагравальны" in {
+		val result = EntryParser2.parseLine(
+			"""|<b>абагравальны</b> — обогревательный; отопительный (<i>сезон</i>)
+			   |""".stripMargin).head
 
+		result shouldBe Entry("абагравальны", Seq("обогревательный", "отопительный"))
+	}
 
 	"debug" in {
 		val line =
-			"""|<b>3.</b> <i>(при выражении резкого низкого звука от удара, выстрела)</i> ух <br>
-               |<b>ух! - раздался глухой удар</b> ух! - раздаўся глухі ўдар
+			"""|<b>абагравальны</b> — обогревательный; отопительный (<i>сезон</i>)
 			   |""".stripMargin
 
-		parseAll(variantB, line) match {
+		parseAll(simple, line) match {
 			case Success(matched, input) =>
 				println(matched)
 			case NoSuccess(msg, next) =>

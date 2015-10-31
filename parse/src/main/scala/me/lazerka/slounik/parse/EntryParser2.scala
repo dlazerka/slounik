@@ -21,13 +21,16 @@ object EntryParser2 extends RegexParsers {
 	val mainLemmaPunctuated = "<b>" ~> phrasePunctuated <~ "</b>"
 
 	val phrases = rep1sep(phrase, opt(", " | ";"))
-	val simple = mainLemma ~ "—" ~ phrases ^^ { case m ~ t ~ ls => m.map(mainLemma => Entry(mainLemma, ls.distinct))}
 
 	// Parentheses and italic opener can be misplaced, see `асадка` test.
 	// Extra parentheses opener can be at the end, see `папячы` test.
 	val usageHint = """\(?<i>\(?""".r ~> phrases <~ """\)?</i>\)?\)?""".r
 
-	val translations = (hint ?) ~> phrases <~ (usageHint ?)
+	val simple = mainLemma ~ "—" ~ phrases <~ opt(usageHint) ^^ {
+		case m ~ t ~ ls => m.map(mainLemma => Entry(mainLemma, ls.distinct))
+	}
+
+	val translations = (hint ?) ~> phrases <~ opt(usageHint)
 
 	val variant = """[0-9]+\)""".r ~> translations
 	val variants = rep1sep(variant, ";" ?)
@@ -45,8 +48,11 @@ object EntryParser2 extends RegexParsers {
 		parseAll(global, line) match {
 			case Success(matched, input) =>
 				matched
-			case NoSuccess(msg, _) =>
-				println(s"NoSuccess: $msg")
+			case Failure(msg, _) =>
+				println(s"Failure for $line: $msg")
+				Seq.empty
+			case Error(msg, _) =>
+				println(s"Error for $line: $msg")
 				Seq.empty
 		}
 }

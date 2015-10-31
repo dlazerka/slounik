@@ -14,7 +14,7 @@ import com.google.common.base.Stopwatch
  */
 class Writer(langsSorted: String, fromLang: String, dictCode: String) {
 	def write(parsed: Vector[(Entry, String)], outFile: Path) = {
-		val fileChannel = FileChannel.open(outFile, WRITE, CREATE)
+		val fileChannel = FileChannel.open(outFile, WRITE, TRUNCATE_EXISTING, CREATE)
 		val stopwatch = Stopwatch.createStarted()
 
 		try {
