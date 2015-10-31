@@ -9,9 +9,8 @@ import org.scalatest.{FreeSpec, Matchers}
 //noinspection UnitMethodIsParameterless
 class EntryParser2Test extends FreeSpec with Matchers {
 		"встрепать" in {
-			val result = EntryParser2.parseLine("<b>встрепать</b> — ускудлаціць, узлахмаціць")
-			result.isDefined shouldBe true
-			result.get shouldBe Entry("встрепать", Seq("ускудлаціць", "узлахмаціць"))
+			val result = EntryParser2.parseLine("<b>встрепать</b> — ускудлаціць, узлахмаціць").head
+			result shouldBe Entry("встрепать", Seq("ускудлаціць", "узлахмаціць"))
 		}
 
 		"папячы" in {
@@ -20,9 +19,8 @@ class EntryParser2Test extends FreeSpec with Matchers {
 	               | 1) испечь, изжарить (<i>долго, неоднократно</i>));
 	               | 2) обжечь, опалить (<i>огнём, солнцем</i>);
 	               | 3) попечь, пожарить (<i>некоторое время</i>)
-	               |""".stripMargin)
-			result.isDefined shouldBe true
-			result.get shouldBe Entry("папячы", Seq(
+	               |""".stripMargin).head
+			result shouldBe Entry("папячы", Seq(
 				"испечь",
 				"изжарить",
 				"обжечь",
@@ -38,9 +36,8 @@ class EntryParser2Test extends FreeSpec with Matchers {
 			       | 2) оправка, обрамление;
 			       | 3) установка;
 			       | 4) <i>уст.</i> ручка <i>(письменная принадлежность</i>)
-			       |""".stripMargin)
-			result.isDefined shouldBe true
-			result.get shouldBe Entry("асадка", Seq(
+			       |""".stripMargin).head
+			result shouldBe Entry("асадка", Seq(
 				"насадка",
 				"присадка",
 				"оправка",
@@ -52,14 +49,12 @@ class EntryParser2Test extends FreeSpec with Matchers {
 		"кіраванне" in {
 			val result = EntryParser2.parseLine(
 				"""|<b>кіраванне</b> — 1) управление; 2) руководство; правление 3) <i>лінгв.</i> управление
-		           |""".stripMargin)
+		           |""".stripMargin).head
 
-			result.isDefined shouldBe true
-			result.get shouldBe Entry("кіраванне", Seq(
+			result shouldBe Entry("кіраванне", Seq(
 				"управление",
 				"руководство",
-				"правление",
-				"управление"))
+				"правление"))
 		}
 
 		"ух" in {
@@ -70,10 +65,9 @@ class EntryParser2Test extends FreeSpec with Matchers {
 				   | ух, як горача<br>
 				   |<b>3.</b> <i>(при выражении резкого низкого звука от удара, выстрела)</i> ух<br>
 				   |<b>ух! - раздался глухой удар</b> ух! - раздаўся глухі ўдар
-		           |""".stripMargin)
+		           |""".stripMargin).head
 
-			result.isDefined shouldBe true
-			result.get shouldBe Entry("ух", Seq("ух"))
+			result shouldBe Entry("ух", Seq("ух"))
 		}
 
 		"debug" in {
@@ -88,6 +82,5 @@ class EntryParser2Test extends FreeSpec with Matchers {
 				case NoSuccess(msg, next) =>
 					fail(msg)
 			}
-
 		}
 }

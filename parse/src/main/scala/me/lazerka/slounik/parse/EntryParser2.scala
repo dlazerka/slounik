@@ -14,14 +14,14 @@ object EntryParser2 extends RegexParsers {
 	val words = rep1(wordComma | word) ^^ {_.mkString(" ")}
 	val phrasePunctuated = words ~ rep("-" ~ words) ^^ { case w ~ ws => w + " " + ws.mkString(" ") }
 
-	val phrases = rep1sep(phrase, opt(", " | ";"))
-
 	val hint = """<i>[а-яўіё]+\.</i>""".r
 
-	val mainLemma = "<b>" ~> phrase <~ "</b>" <~ (hint ?)
+	val secondMainLemma = "(" ~> phrase <~ ")"
+	val mainLemma = "^<b>".r ~> phrase ~ rep(secondMainLemma) <~ "</b>" <~ (hint ?) ^^ {case p ~ ps => p :: ps}
 	val mainLemmaPunctuated = "<b>" ~> phrasePunctuated <~ "</b>"
 
-	val simple = mainLemma ~ "—" ~ phrases ^^ { case m ~ t ~ ls => Entry(m, ls.distinct) }
+	val phrases = rep1sep(phrase, opt(", " | ";"))
+	val simple = mainLemma ~ "—" ~ phrases ^^ { case m ~ t ~ ls => m.map(mainLemma => Entry(mainLemma, ls.distinct))}
 
 	// Parentheses and italic opener can be misplaced, see `асадка` test.
 	// Extra parentheses opener can be at the end, see `папячы` test.
@@ -38,18 +38,15 @@ object EntryParser2 extends RegexParsers {
 
 	val rest = ("—" ~> variants) | ("<br>" ~> variantsB)
 
-	val multi = mainLemma ~ rest ^^ { case l ~ v => Entry(l, v.flatten.distinct) }
+	val multi = mainLemma ~ rest ^^ { case mls ~ v => mls.map(mainLemma => Entry(mainLemma, v.flatten.distinct)) }
 	val global = simple | multi
 
-	def parseLine(line: String): Option[Entry] =
+	def parseLine(line: String): Seq[Entry] =
 		parseAll(global, line) match {
 			case Success(matched, input) =>
-				Some(matched)
-			case Failure(msg, _) =>
-				println(s"Failure: $msg")
-				None
-			case Error(msg, _) =>
-				println(s"Error: $msg")
-				None
+				matched
+			case NoSuccess(msg, _) =>
+				println(s"NoSuccess: $msg")
+				Seq.empty
 		}
 }
