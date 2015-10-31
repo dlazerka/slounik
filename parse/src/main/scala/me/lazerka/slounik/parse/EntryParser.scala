@@ -4,6 +4,8 @@ package me.lazerka.slounik.parse
  * @author Dzmitry Lazerka
  */
 object EntryParser {
+	val mainLemmaPattern = "^<b>(.*?)</b>".r
+
 	val lemmaPattern = "[А-Яа-яЎўІіЁё]|([А-Яа-яЎўІіЁё][а-яўіё' -]*[а-яўіё'!-])".r
 	val lemmaDeclarationPattern = s"$lemmaPattern( \\(?$lemmaPattern(, $lemmaPattern)*\\)?)?".r
 
@@ -32,7 +34,22 @@ object EntryParser {
 	)
 	val dropPatterns = drop.map(_.r())
 
-	def parseLine(line: String): Option[Entry] = {
+	def parseLine(line: String): Seq[Entry] = {
+		val mainLemmasString = mainLemmaPattern.findPrefixMatchOf(line).get.group(1)
+		val mainLemmas = mainLemmasString
+				.split('(')
+				.toVector
+				.flatMap(_.split(','))
+				.map(_.replace(')', ' ').trim)
+				.filter(lemma => {
+			if (EntryParser.lemmaPattern.pattern.matcher(lemma).matches()) {
+				true
+			} else {
+				println(s"Skipped lemma: $lemma")
+				false
+			}
+		})
+
 		var cleared = underline.replaceAllIn(line, "")
 
 		// Not foldLeft() for debugging.
@@ -52,9 +69,9 @@ object EntryParser {
 				false
 		})
 		if (translations.nonEmpty) {
-			Some(Entry("", translations))
+			mainLemmas.map(mainLemma => Entry(mainLemma, translations))
 		} else {
-			None
+			Seq.empty
 		}
 	}
 }

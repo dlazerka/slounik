@@ -95,33 +95,19 @@ class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
 			}
 			val line = new String(lineBytes, UTF_8)
 
-			val lemmas = lemma
-					.split('(')
-					.flatMap(_.split(','))
-					.map(_.replace(')', ' ').trim)
-					.filter(lemma => {
-				if (EntryParser.lemmaPattern.pattern.matcher(lemma).matches()) {
-					true
-				} else {
-					println(s"Skipped lemma: $lemma")
-					false
-				}
-			})
-
-			lemmas.foreach(lemma => linesBuilder += ((lemma, line)))
+			linesBuilder += ((lemma, line))
 		}
 		val lines = linesBuilder.result()
 		println(s"Read ${lines.size} lines in ${stopwatch.elapsed(MILLISECONDS)}ms")
 
 		val parsed = lines
-				.map(pair => (pair._1, EntryParser.parseLine(pair._2), pair._2))
-				.collect{
-					case (lemma: String, entry: Some[Entry], line: String) =>
-						(Entry(lemma, entry.get.translations),line)
-				}
+				.map(pair => (EntryParser.parseLine(pair._2), pair._2))
+				.flatMap(pair => pair._1.map(entry => (entry, pair._2)))
 		if (parsed.isEmpty) {
 			println(s"Nothing parsed from ${dictFile.toAbsolutePath}")
 			return
+		} else {
+			println(s"Parsed ${parsed.size} entries")
 		}
 
 		val outFile = dictFile.getParent.resolve(dictCode + ".slounik")
