@@ -97,11 +97,13 @@ angular.module('me.lazerka.slounik', [])
 						var newTranslations = [];
 
 						angular.forEach(existingRow[lang].translations, function(translation) {
+							// Was the translation already seen?
 							var newTranslation = row[lang].translations.filter(function(newTranslation) {
 								return newTranslation.lemma == translation.lemma;
 							})[0];
 
 							if (newTranslation) {
+								// Then don't add the translation, only add it's dict.
 								translation.dicts = translation.dicts.concat(newTranslation.dicts);
 							} else {
 								newTranslations = row[lang].translations;

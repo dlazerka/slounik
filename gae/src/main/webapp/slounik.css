@@ -48,6 +48,7 @@ html, body {
 }
 .results .translation {
 	display: inline-block;
+	word-wrap: normal;
 }
 
 .words .query {
