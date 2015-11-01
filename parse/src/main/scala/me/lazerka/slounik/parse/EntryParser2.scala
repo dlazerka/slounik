@@ -14,10 +14,10 @@ object EntryParser2 extends RegexParsers {
 	val words = rep1(wordComma | word) ^^ {_.mkString(" ")}
 	val phrasePunctuated = words ~ rep("-" ~ words) ^^ { case w ~ ws => w + " " + ws.mkString(" ") }
 
-	val hint = """<i>[а-яўіё]+\.</i>""".r
+	val hint = "<i>\\(?".r ~> rep1( "[а-яўіё]+\\.?".r) <~ "\\)?</i>".r
 
 	val secondMainLemma = "(" ~> phrase <~ ")"
-	val mainLemma = "^<b>".r ~> phrase ~ rep(secondMainLemma) <~ "</b>" <~ (hint ?) ^^ {case p ~ ps => p :: ps}
+	val mainLemmas = "^<b>".r ~> phrase ~ rep(secondMainLemma) <~ "</b>" <~ (hint ?) ^^ {case p ~ ps => p :: ps}
 	val mainLemmaPunctuated = "<b>" ~> phrasePunctuated <~ "</b>"
 
 	val phrases = rep1sep(phrase, opt(", " | ";"))
@@ -26,7 +26,7 @@ object EntryParser2 extends RegexParsers {
 	// Extra parentheses opener can be at the end, see `папячы` test.
 	val usageHint = """\(?<i>\(?""".r ~> phrases <~ """\)?</i>\)?\)?""".r
 
-	val simple = mainLemma ~ "—" ~ phrases <~ opt(usageHint) ^^ {
+	val simple = mainLemmas ~ "—" ~ phrases <~ opt(usageHint) ^^ {
 		case m ~ t ~ ls => m.map(mainLemma => Entry(mainLemma, ls.distinct))
 	}
 
@@ -41,18 +41,35 @@ object EntryParser2 extends RegexParsers {
 
 	val rest = ("—" ~> variants) | ("<br>" ~> variantsB)
 
-	val multi = mainLemma ~ rest ^^ { case mls ~ v => mls.map(mainLemma => Entry(mainLemma, v.flatten.distinct)) }
-	val global = simple | multi
+	val multi = mainLemmas ~ rest ^^ { case mls ~ v => mls.map(mainLemma => Entry(mainLemma, v.flatten.distinct)) }
+
+//	val withForms = mainLemmas ~ word ~ ", .*".r ^^ {
+//		case mls ~ w ~ t => mls.map((ml: String) => Entry(ml, Seq(w)))
+//	}
+	val global = multi | simple
 
 	def parseLine(line: String): Seq[Entry] =
 		parseAll(global, line) match {
 			case Success(matched, input) =>
 				matched
-			case Failure(msg, _) =>
-				println(s"Failure for $line: $msg")
+			case Failure(msg, input: Input) =>
+				printFailure(msg, line, input.offset)
 				Seq.empty
-			case Error(msg, _) =>
-				println(s"Error for $line: $msg")
-				Seq.empty
+			case Error(msg, input: Input) =>
+				printFailure(msg, line, input.offset)
+				throw new Exception(msg)
 		}
+
+	def printFailure(msg: String, line: String, offset: Int) = {
+		Console.out.print("Failure @ `")
+		val s1 = line.slice(offset - 10, offset)
+		val s2 = line.slice(offset, offset + 1)
+		val s3 = line.slice(offset + 1, offset + 10)
+		Console.out.print(s1)
+		Console.err.print(s2)
+		Console.out.print(s3)
+		//				val spot = line.slice(input.offset - 10, input.offset + 10)
+		//				println(s"Failure @ `$spot`: $msg")
+		Console.out.println(s"`: $msg")
+	}
 }

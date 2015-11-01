@@ -78,15 +78,47 @@ class EntryParser2Test extends FreeSpec with Matchers {
 		result shouldBe Entry("абагравальны", Seq("обогревательный", "отопительный"))
 	}
 
+//	"трое" in {
+//		val result = EntryParser2.parseLine(
+//			"""|<b>трое</b> <i>(с сущ. муж.)</i> тры, <i>род.</i> трох;
+//			   | <i>(с сущ. муж. и жен., вместе взятыми, с сущ. общего рода, с сущ., употребляющимися
+//			   | только во мн., с сущ., обозначающими детей и детёнышей, с личными мест. мн.)</i> трое,
+//			   | <i>род.</i> траіх<br>
+//			   |<b>трое товарищей</b> тры таварышы<br>
+//			   |<b>их было трое - двое мужчин и одна женщина</b> іх было трое - два мужчыны і адна жанчына<br>
+//			   |<b>у них трое детей</b> у іх трое дзяцей<br>
+//			   |<b>трое котят</b> трое кацянят<br>
+//			   |<b>трое суток</b> трое сутак
+//			   |""".stripMargin)
+//
+//		result shouldBe Seq("тры") // TODO
+//	}
+//
+//	"урок" in {
+//		val result = EntryParser2.parseLine(
+//			"""|<b>урок</b> <i>в разн. знач.</i> урок, -ка <i>муж.</i><br>
+//		       |<b>урок белорусского языка</b> урок беларускай мовы<br>
+//		       |<b>это послужит ему уроком</b> гэта паслужыць (будзе) яму урокам<br>
+//		       |<b>брать уроки (чего-либо у кого-либо)</b> браць урокі (чаго-небудзь у каго-небудзь)<br>
+//		       |<b>давать уроки (где-либо, кому-либо)</b> даваць урокі (дзе-небудзь, каму-небудзь)
+//		       |""".stripMargin)
+//		result shouldBe Seq("урок") // TODO
+//	}
+//
+
 	"debug" in {
 		val line =
-			"""|<b>абагравальны</b> — обогревательный; отопительный (<i>сезон</i>)
-			   |""".stripMargin
+			"""<i>(с сущ. муж.)</i> тры"""
 
-		parseAll(simple, line) match {
+		parseAll(hint ~ word, line) match {
 			case Success(matched, input) =>
 				println(matched)
-			case NoSuccess(msg, next) =>
+			case NoSuccess(msg, input) =>
+				Console.out.print("Failure @ `")
+				Console.out.print(line.slice(input.offset - 10, input.offset))
+				Console.err.print(line.slice(input.offset, input.offset + 1))
+				Console.out.print(line.slice(input.offset, input.offset + 10))
+				Console.out.println("`")
 				fail(msg)
 		}
 	}
