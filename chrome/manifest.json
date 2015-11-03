@@ -1,0 +1,19 @@
+{
+	"manifest_version": 2,
+	"name": "Slounik",
+	"version": "2.2",
+	"description": "Беларуска-Рускі Слоўнік, Русско-Белорусский Словарь",
+	"icons": { "16": "icon/books16.png",
+	           "48": "icon/books48.png",
+	           "128": "icon/books128.png"
+	},
+	"browser_action": {
+		"default_icon": "icon/books48.png",
+		"default_popup": "slounik.html"
+	},
+	"permissions": [
+		"http://slounik.dlazerka.name/",
+		"https://slounik.dlazerka.name/"
+	],
+    "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'"
+}

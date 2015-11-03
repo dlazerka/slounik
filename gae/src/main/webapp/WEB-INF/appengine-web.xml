@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
 	<application>lazerka-slounik</application>
-	<version>22-dict</version>
+	<version>23-update</version>
 
 	<!-- Configure serving/caching of GWT files -->
 	<static-files>
 		<include path="/**.html" expiration="1s"/> <!-- force reload each time -->
-		<!--<include path="/**.js" expiration="365d" /> &lt;!&ndash; PreDeploy script adds ETags &ndash;&gt;-->
-		<include path="/**.js" expiration="10m" /> <!-- PreDeploy script adds ETags -->
-		<!--<include path="/**.css" expiration="365d" /> &lt;!&ndash; PreDeploy script adds ETags &ndash;&gt;-->
-		<include path="/**.css" expiration="10m" /> <!-- PreDeploy script adds ETags -->
+		<include path="/**.js" expiration="365d" /> <!-- PreDeploy script adds ETags -->
+		<include path="/**.css" expiration="365d" /> <!-- PreDeploy script adds ETags -->
 		<include path="favicon.ico" expiration="1d" />
 	</static-files>
 

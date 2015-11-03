@@ -21,14 +21,16 @@
 	</style>
 
 	<script type="text/javascript" src="lib/jquery-2.1.4.js"
-	        predeploy="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js" defer></script>
+	        predeploy="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js" defer></script>
 	<script type="text/javascript" src="lib/angular-1.4.7.js"
-	        predeploy="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js" defer></script>
+	        predeploy="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js" defer></script>
 
 	<script type="text/javascript" src="slounik.js?crc=predeploy" defer></script>
+
+	<script type="text/javascript" src="lib/ga.js" async></script>
 </head>
 
-<body class="ng-cloak" ng-app="me.lazerka.slounik">
+<body class="ng-cloak" ng-app="name.dlazerka.slounik">
 <div class="main" ng-controller="SlounikController">
 	<input type="text" class="input" maxlength="100" ng-model="input" preselect/>
 
@@ -40,7 +42,6 @@
 		</tr>
 		<tr ng-repeat="row in rows">
 			<td class="left">
-				<div class="dict">{{row.be.dict}}</div>
 				<div ng-repeat="translation in row.be.translations"
 				      ng-mouseover="mouseOver(translation, row.be)"
 				      ng-mouseleave="mouseOut(row.be)"
@@ -48,6 +49,7 @@
 				>
 					<span class="match">{{translation.match}}</span>{{translation.rest}}<span ng-show="! $last">,&nbsp</span>
 				</div>
+				<div class="dict">{{row.be.dict}}</div>
 			</td>
 			<td class="arrows">{{row.arrow}}</td>
 			<td class="right">
@@ -73,22 +75,5 @@
 	</div>
 </div>
 
-
-<script type="text/javascript">
-
-	var _gaq = _gaq || [];
-	_gaq.push(['_setAccount', 'UA-22160908-1']);
-	_gaq.push(['_trackPageview']);
-
-	(function() {
-		var ga = document.createElement('script');
-		ga.type = 'text/javascript';
-		ga.async = true;
-		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-		var s = document.getElementsByTagName('script')[0];
-		s.parentNode.insertBefore(ga, s);
-	})();
-
-</script>
 </body>
 </html>

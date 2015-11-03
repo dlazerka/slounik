@@ -1,8 +1,28 @@
+/*
+ *    Copyright 2015 Dzmitry Lazerka
+ *
+ *    This file is part of Slounik.
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>
+ */
+
 * {
 	font-family: arial, sans-serif;
 }
 html, body {
 	margin: 0;
+	min-width: 600px;
 }
 .main {
 	margin: 2ex auto;
@@ -16,32 +36,49 @@ html, body {
 	border: 1px black solid;
 	width: 90%;
 }
-.left, .right {
-	max-width: 47%;
-	min-width: 13ex;
-	display: inline-block;
+.results {
+	margin: 0;
+	width: 100%;
 }
-.left {
-	text-align: right;
-}
-.right {
-	text-align: left;
-}
-.arrows {
-	display: inline-block;
-	margin: 0 auto;
-}
-.label {
+.results th {
 	color: gray;
 }
+
+.results .left,
+.results .right {
+	width: 47%;
+	min-width: 13ex;
+	white-space: normal;
+}
+.results .left {
+	text-align: right;
+}
+.results .right {
+	text-align: left;
+}
+.results .arrows {
+	margin: 0 auto;
+}
+.results .match {
+	text-decoration: underline;
+}
+.results .dict {
+	color: gray;
+	display: block;
+}
+.results .translation {
+	display: inline-block;
+	word-wrap: normal;
+}
+
 .words .query {
 	text-decoration: underline;
 }
-.noResults {
-	color: red;
+.no-results {
+	color: #dd0000;
+	padding: 30px 0;
 }
-@media screen and (min-width: 40ex) {
-	* {
-		font-size: large;
-	}
+.searching {
+	color: gray;
+	padding: 30px 0;
 }

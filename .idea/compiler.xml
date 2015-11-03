@@ -27,9 +27,5 @@
         <module name="tools" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="gae" target="1.5" />
-      <module name="parse" target="1.5" />
-    </bytecodeTargetLevel>
   </component>
 </project>

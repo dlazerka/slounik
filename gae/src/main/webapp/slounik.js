@@ -1,5 +1,25 @@
+/*
+ *    Copyright 2015 Dzmitry Lazerka
+ *
+ *    This file is part of Slounik.
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>
+ */
+
 'use strict';
-angular.module('me.lazerka.slounik', [])
+
+angular.module('name.dlazerka.slounik', [])
 	.directive('preselect', function($timeout) {
 		return {
 			link: function($scope, element, attrs) {
@@ -10,24 +30,6 @@ angular.module('me.lazerka.slounik', [])
 			}
 		}
 	})
-/*
-	.factory('DictService', function() {
-		var dicts = {};
-
-		$http.get('/rest/dict/be/ru')
-			.then(function(response) {
-				angular.forEach(response.data, function(res) {
-					dicts[res.id] = dict;
-				});
-			});
-
-		return {
-			getDict : function(dictId) {
-				return dicts[dictId];
-			}
-		}
-	})
-*/
 	.controller('SlounikController', function($scope, $http) {
 		$scope.input = localStorage.getItem('input') || 'слоўнік';
 		$scope.results = [];
