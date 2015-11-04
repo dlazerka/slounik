@@ -26,4 +26,10 @@
 	<!-- Commented because Eclipse Google Plugin does not understand -->
 	<threadsafe>true</threadsafe>
 
+<!--
+	<automatic-scaling>
+		<min-idle-instances>1</min-idle-instances>
+	</automatic-scaling>
+-->
+
 </appengine-web-app>

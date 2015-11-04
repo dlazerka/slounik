@@ -46,8 +46,9 @@ html, body {
 
 .results .left,
 .results .right {
-	width: 47%;
 	min-width: 13ex;
+	position: relative;
+	width: 47%;
 	white-space: normal;
 }
 .results .left {
@@ -63,8 +64,19 @@ html, body {
 	text-decoration: underline;
 }
 .results .dict {
+	background-color: white;
+	border-radius: 2px;
 	color: gray;
 	display: block;
+	padding: 5px;
+	position: absolute;
+	z-index: 2;
+}
+.results .left .dict {
+	right: 0;
+}
+.results .right .dict {
+	left: 0;
 }
 .results .translation {
 	display: inline-block;

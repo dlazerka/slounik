@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Slounik",
-	"version": "2.2",
+	"version": "2.3",
 	"description": "Беларуска-Рускі Слоўнік, Русско-Белорусский Словарь",
 	"icons": { "16": "icon/books16.png",
 	           "48": "icon/books48.png",
