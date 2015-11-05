@@ -84,5 +84,5 @@ html, body {
 }
 .dict {
 	color: gray;
-	padding: 5px;
+	min-height: 1.2em;
 }

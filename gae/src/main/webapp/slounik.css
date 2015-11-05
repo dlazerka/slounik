@@ -84,7 +84,7 @@ html, body {
 }
 .dict {
 	color: gray;
-	padding: 5px;
+	min-height: 1.2em;
 }
 @media screen and (min-width: 40ex) {
 	* {

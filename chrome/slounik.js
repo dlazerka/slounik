@@ -124,11 +124,11 @@ angular.module('name.dlazerka.slounik', [])
 			$scope.found = rows.length > 0;
 
 			$scope.mouseOver = function(translation, row) {
-				row.dict = translation.dicts.join(', ');
+				$scope.dict = translation.dicts.join(', ');
 			};
 
 			$scope.mouseOut = function(row) {
-				row.dict = null;
+				$scope.dict = null;
 			};
 		}
 	})
