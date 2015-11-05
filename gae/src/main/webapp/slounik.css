@@ -47,7 +47,6 @@ html, body {
 .results .left,
 .results .right {
 	min-width: 13ex;
-	position: relative;
 	width: 47%;
 	white-space: normal;
 }
@@ -63,24 +62,13 @@ html, body {
 .results .match {
 	text-decoration: underline;
 }
-.results .dict {
-	background-color: white;
-	border-radius: 2px;
-	color: gray;
-	display: block;
-	padding: 5px;
-	position: absolute;
-	z-index: 2;
-}
-.results .left .dict {
-	right: 0;
-}
-.results .right .dict {
-	left: 0;
-}
 .results .translation {
 	display: inline-block;
 	word-wrap: normal;
+	font-size: 0;
+}
+.results .comma {
+	padding-right: 1ex;
 }
 
 .words .query {
@@ -93,6 +81,10 @@ html, body {
 .searching {
 	color: gray;
 	padding: 30px 0;
+}
+.dict {
+	color: gray;
+	padding: 5px;
 }
 @media screen and (min-width: 40ex) {
 	* {

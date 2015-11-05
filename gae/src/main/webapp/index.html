@@ -5,8 +5,12 @@
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<meta name="HandheldFriendly" content="true"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+	<meta name="description" content="Русско-Белорусский Словарь, Руска-Беларускі Слоўнік">
 	<title>Слоўнік</title>
+
 	<link rel="icon" type="image/png" href="/favicon.ico"/>
+
 	<link rel="stylesheet" type="text/css" href="/slounik.css?crc=predeploy"/>
 	<style type="text/css">
 		[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak],
@@ -31,6 +35,8 @@
 </head>
 
 <body class="ng-cloak" ng-app="name.dlazerka.slounik">
+<h1 style="margin-top: -1000em; position: absolute;">Русско-Белорусский словарь, Беларуска-Рускі слоўнік</h1>
+
 <div class="main" ng-controller="SlounikController">
 	<input type="text" class="input" maxlength="100" ng-model="input" preselect/>
 
@@ -47,9 +53,10 @@
 				      ng-mouseleave="mouseOut(row.be)"
 				      class="translation"
 				>
-					<span class="match">{{translation.match}}</span>{{translation.rest}}<span ng-show="! $last">,&nbsp</span>
+					<span class="match">{{translation.match}}</span>
+					<span class="rest">{{translation.rest}}</span>
+					<span class="comma" ng-show="! $last">, </span>
 				</div>
-				<div class="dict">{{row.be.dict}}</div>
 			</td>
 			<td class="arrows">{{row.arrow}}</td>
 			<td class="right">
@@ -58,10 +65,15 @@
 				      ng-mouseleave="mouseOut(row.ru)"
 				      class="translation"
 				>
-					<span class="match">{{translation.match}}</span>{{translation.rest}}<span ng-show="! $last">,&nbsp
-				</span>
+					<span class="match">{{translation.match}}</span>
+					<span class="rest">{{translation.rest}}</span>
+					<span class="comma" ng-show="! $last">,</span>
 				</div>
-				<div class="dict">{{row.ru.dict}}</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3" class="dict" ng-style="{'visibility': (dict?'visible':'hidden')}">
+				{{dict}}
 			</td>
 		</tr>
 	</table>
