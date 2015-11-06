@@ -18,7 +18,7 @@
  */
 
 'use strict';
-angular.module('me.lazerka.slounik.admin', [])
+angular.module('name.dlazerka.slounik.admin', [])
 	.controller('AdminController', function($scope, $http) {
 		/**
 		 * @param file {File}

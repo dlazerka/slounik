@@ -10,12 +10,12 @@
 	</welcome-file-list>
 
 	<listener>
-		<listener-class>me.lazerka.slounik.gae.web.ServletContextListener</listener-class>
+		<listener-class>name.dlazerka.slounik.gae.web.ServletContextListener</listener-class>
 	</listener>
 
 	<filter>
 		<filter-name>BypassGuiceFilter</filter-name>
-		<filter-class>me.lazerka.slounik.gae.web.BypassGuiceFilter</filter-class>
+		<filter-class>name.dlazerka.slounik.gae.web.BypassGuiceFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>BypassGuiceFilter</filter-name>
