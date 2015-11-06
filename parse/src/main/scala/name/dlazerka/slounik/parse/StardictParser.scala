@@ -25,7 +25,7 @@ import scala.util.parsing.combinator._
 /**
  * @author Dzmitry Lazerka
  */
-object EntryParser2 extends RegexParsers {
+object StardictParser extends RegexParsers {
 
 	val word = """[А-Яа-яЎўІіЁё][а-яўіё'-]*!?""".r
 	val phrase = rep1(word) ^^ { words => words.mkString(" ") }

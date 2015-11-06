@@ -1,20 +1,20 @@
 package name.dlazerka.slounik.parse
 
-import EntryParser2._
+import StardictParser._
 import org.scalatest.{FreeSpec, Matchers}
 
 /**
  * @author Dzmitry Lazerka
  */
 //noinspection UnitMethodIsParameterless
-class EntryParser2Test extends FreeSpec with Matchers {
+class StardictParserRegex2Test extends FreeSpec with Matchers {
 	"встрепать" in {
-		val result = EntryParser2.parseLine("<b>встрепать</b> — ускудлаціць, узлахмаціць").head
+		val result = StardictParser.parseLine("<b>встрепать</b> — ускудлаціць, узлахмаціць").head
 		result shouldBe Entry("встрепать", Seq("ускудлаціць", "узлахмаціць"))
 	}
 
 	"папячы" in {
-		val result = EntryParser2.parseLine(
+		val result = StardictParser.parseLine(
 			"""|<b>папячы</b> —
                | 1) испечь, изжарить (<i>долго, неоднократно</i>));
                | 2) обжечь, опалить (<i>огнём, солнцем</i>);
@@ -30,7 +30,7 @@ class EntryParser2Test extends FreeSpec with Matchers {
 	}
 
 	"асадка" in {
-		val result = EntryParser2.parseLine(
+		val result = StardictParser.parseLine(
 			"""|<b>асадка</b> —
 		       | 1) насадка, присадка;
 		       | 2) оправка, обрамление;
@@ -47,7 +47,7 @@ class EntryParser2Test extends FreeSpec with Matchers {
 	}
 
 	"кіраванне" in {
-		val result = EntryParser2.parseLine(
+		val result = StardictParser.parseLine(
 			"""|<b>кіраванне</b> — 1) управление; 2) руководство; правление 3) <i>лінгв.</i> управление
 	           |""".stripMargin).head
 
@@ -58,7 +58,7 @@ class EntryParser2Test extends FreeSpec with Matchers {
 	}
 
 	"ух" in {
-		val result = EntryParser2.parseLine(
+		val result = StardictParser.parseLine(
             """|<b>ух</b> <i>межд.</i><br>
 			   |<b>1.</b> <i>(при выражении восхищения, удивления)</i> ух<br>
 			   |<b>2.</b> <i>(при выражении чувства усталости и других чувств)</i> ух<br><b>ух, как жарко</b>
@@ -71,7 +71,7 @@ class EntryParser2Test extends FreeSpec with Matchers {
 	}
 
 	"абагравальны" in {
-		val result = EntryParser2.parseLine(
+		val result = StardictParser.parseLine(
 			"""|<b>абагравальны</b> — обогревательный; отопительный (<i>сезон</i>)
 			   |""".stripMargin).head
 

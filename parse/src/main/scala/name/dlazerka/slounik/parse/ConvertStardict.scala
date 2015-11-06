@@ -25,7 +25,7 @@ import sun.misc.IOUtils
  */
 object ConvertStardict {
 	/**
-	 * Usage: ParseStardict &lt;langFrom&gt; &lt;langTo&gt; &lt;directory&gt;
+	 * Usage: ConvertStardict &lt;langFrom&gt; &lt;langTo&gt; &lt;directory&gt;
 	 */
 	def main(args: Array[String]) = {
 		assert(args.length == 3)
@@ -101,7 +101,7 @@ class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
 		println(s"Read ${lines.size} lines in ${stopwatch.elapsed(MILLISECONDS)}ms")
 
 		val parsed = lines
-				.map(pair => (EntryParser.parseLine(pair._2), pair._2))
+				.map(pair => (StardictParserRegex.parseLine(pair._2), pair._2))
 				.flatMap(pair => pair._1.map(entry => (entry, pair._2)))
 		if (parsed.isEmpty) {
 			println(s"Nothing parsed from ${dictFile.toAbsolutePath}")

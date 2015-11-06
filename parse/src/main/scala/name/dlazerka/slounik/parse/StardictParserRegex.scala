@@ -3,7 +3,7 @@ package name.dlazerka.slounik.parse
 /**
  * @author Dzmitry Lazerka
  */
-object EntryParser {
+object StardictParserRegex {
 	val mainLemmaPattern = "^<b>(.*?)</b>".r
 
 	val lemmaPattern = "[А-Яа-яЎўІіЁё]|([А-Яа-яЎўІіЁё][а-яўіё' -]*[а-яўіё'!-])".r
@@ -42,7 +42,7 @@ object EntryParser {
 				.flatMap(_.split(','))
 				.map(_.replace(')', ' ').trim)
 				.filter(lemma => {
-			if (EntryParser.lemmaPattern.pattern.matcher(lemma).matches()) {
+			if (StardictParserRegex.lemmaPattern.pattern.matcher(lemma).matches()) {
 				true
 			} else {
 				println(s"Skipped lemma: $lemma")
