@@ -1,12 +1,12 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ConvertStardict" type="Application" factoryName="Application" singleton="true">
+  <configuration default="false" name="StardictConverter" type="Application" factoryName="Application" singleton="true">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
       <pattern>
         <option name="PATTERN" value="me.lazerka.slounik.parse.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
-    <option name="MAIN_CLASS_NAME" value="name.dlazerka.slounik.parse.ConvertStardict" />
+    <option name="MAIN_CLASS_NAME" value="name.dlazerka.slounik.parse.StardictConverter" />
     <option name="VM_PARAMETERS" value="" />
     <option name="PROGRAM_PARAMETERS" value="be ru data/stardict/be-ru/" />
     <option name="WORKING_DIRECTORY" value="" />

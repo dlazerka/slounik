@@ -7,7 +7,7 @@ import org.scalatest.{FreeSpec, Matchers}
  * @author Dzmitry Lazerka
  */
 //noinspection UnitMethodIsParameterless
-class StardictParserRegex2Test extends FreeSpec with Matchers {
+class StardictParserTest extends FreeSpec with Matchers {
 	"встрепать" in {
 		val result = StardictParser.parseLine("<b>встрепать</b> — ускудлаціць, узлахмаціць").head
 		result shouldBe Entry("встрепать", Seq("ускудлаціць", "узлахмаціць"))

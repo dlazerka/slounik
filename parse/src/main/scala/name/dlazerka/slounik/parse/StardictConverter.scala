@@ -23,9 +23,9 @@ import sun.misc.IOUtils
  *
  * @author Dzmitry Lazerka
  */
-object ConvertStardict {
+object StardictConverter {
 	/**
-	 * Usage: ConvertStardict &lt;langFrom&gt; &lt;langTo&gt; &lt;directory&gt;
+	 * Usage: StardictConverter &lt;langFrom&gt; &lt;langTo&gt; &lt;directory&gt;
 	 */
 	def main(args: Array[String]) = {
 		assert(args.length == 3)
@@ -34,8 +34,8 @@ object ConvertStardict {
 
 		val fromLang = args(0)
 		val toLang = args(1)
-		val langsSorted = Array(fromLang, toLang).sorted.reduce(_ + _)
-		val converter = new ConvertStardict(langsSorted, fromLang, toLang)
+		val langsSorted = Array(fromLang, toLang).sorted.mkString
+		val converter = new StardictConverter(langsSorted, fromLang, toLang)
 
 		val path = FileSystems.getDefault.getPath(args(2))
 
@@ -58,11 +58,11 @@ object ConvertStardict {
 	}
 }
 
-class ConvertStardict(langsSorted: String, fromLang: String, toLang: String) {
+class StardictConverter(langsSorted: String, fromLang: String, toLang: String) {
 	def processDict(dictFile: Path) {
 		println(s"Parsing dict $dictFile")
 		val stopwatch = Stopwatch.createStarted()
-		val dictCode = dictFile.getFileName.toString.replace(".dict.dz", "")
+		val dictCode = dictFile.getFileName.toString.dropRight(".dict.dz".length)
 
 		val dictContent: ByteBuffer = readDictFile(dictFile)
 
