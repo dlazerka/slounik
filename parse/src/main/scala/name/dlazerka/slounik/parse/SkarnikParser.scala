@@ -15,24 +15,28 @@ object SkarnikParser extends Parsers {
 
 	def str(s: String) = acceptSeq(s.toCharArray)
 
-	def any = elem("any", e => e != '\n' && e != '\r')
-	def alpha = elem("alpha", e => e != '\n' && e != '\r' && e != '[')
-	def alphaString = rep1(alpha) ^^ { _.mkString }
-	def newline = '\r' ~ '\n' named "newline"
-	def commentedLine = rep1('#', alpha) <~ newline named "commentedLine"
+	val any = elem("any", e => e != '\n' && e != '\r')
+	val alpha = elem("alpha", e => e != '\n' && e != '\r' && e != '[')
+	val alphaString: StringP = rep1(alpha) ^^ { _.mkString }
+	val newline = '\r' ~ '\n' named "newline"
+	val commentedLine = rep1('#', alpha) <~ newline named "commentedLine"
 
-	def letter = elem("letter", _.isLetter)
-
-	def digit = elem("digit", _.isDigit)
+	val letter = elem("letter", _.isLetter)
+	val digit = elem("digit", _.isDigit)
 
 	def lemmaLine = rep1(letter) <~ newline ^^ { letters => new String(letters.toArray)} named "lemmaLine"
 
-	def lang: StringP = str("[lang id=") ~> digit ~> ']' ~> rep1(alpha) <~ str("[/lang]") ^^
+	def lang: StringP = str("[lang id=") ~> digit ~> ']' ~> rep1(alpha) <~ opt(i | c) <~ str("[/lang]") ^^
 			{ _.mkString } named "[lang]"
 	def trs: OptStringP = str("[!trs]") ~> alphaString <~ str("[/!trs]") ^^ {a => None} named "[!trs]"
-	def com: OptStringP = str("[com]") ~> opt(alphaString) ~> opt(lang) <~ opt(trs) <~ str("[/com]") named "[com]"
+	def com: OptStringP = str("[com]") ~> opt(alphaString) ~> repsep(lang | trs, ' ') <~ str("[/com]") ^^
+			{a => None } named "[com]"
+
+	// TODO: input contains [/i] that don't match opening [i]. Refactor so that [i] are just ignored.
+//	def i = opt(str("[i]") | str("[/i]")) named "i"
 	def i: OptStringP = str("[i]") ~> opt(com) ~> opt(' ') <~ opt(c) <~ opt(repsep(p, str(", ") | ' ')) <~ str("[/i]") ^^
 			{a => None } named "[i]"
+
 	def b: OptStringP = str("[b]") ~> lang <~ str("[/b]") ^^ {a => None} named "[b]"
 	def c: OptStringP = str("[c]") ~> repsep(p | i, str(", ")) <~ str("[/c]") ^^ {a => None} named "[c]"
 	def p: OptStringP = str("[p]") ~> alphaString <~ str("[/p]") ^^ {a => None} named "[p]"
@@ -44,7 +48,9 @@ object SkarnikParser extends Parsers {
 	def explanation: OptStringP = ((i | c) <~ ' ') | star named "explanation"
 
 	def meaningOpen: CharP = '[' ~> 'm' ~> rep1(digit) ~> ']'
-	def meaning: Strings = meaningOpen ~> opt(explanation) ~> repsep(trn, str(", ")) <~ opt(ref) <~ str("[/m]") named
+	def meaning: Strings = meaningOpen ~> opt(explanation) ~>
+			repsep(trn, str(", ")) <~
+			opt(explanation) <~ opt(ref) <~ str("[/m]") named
 			"meaning"
 	def bLine: Strings = str("[b]") ~> rep1(alpha) <~ str("[/b]") <~ opt(' ' <~ rep(any)) ^^
 			{ a => List() } named "bLine"
@@ -79,7 +85,7 @@ object SkarnikParser extends Parsers {
 
 	def printFailure(msg: String, contents: String, offset: Int) = {
 		println(s"Failure @ $offset: " + replace(msg))
-		val regionSize = 30
+		val regionSize = 50
 		println(replace(contents.slice(offset - regionSize, offset + regionSize)))
 		val pad = replace(contents.slice(offset - regionSize, offset)).length
 		println("^".padTo(pad + 1, " ").reverse.mkString)
