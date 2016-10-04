@@ -15,7 +15,7 @@
 
 	<filter>
 		<filter-name>BypassGuiceFilter</filter-name>
-		<filter-class>name.dlazerka.slounik.gae.web.BypassGuiceFilter</filter-class>
+		<filter-class>name.dlazerka.slounik.gae.web.GuiceFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>BypassGuiceFilter</filter-name>
