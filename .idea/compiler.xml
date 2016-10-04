@@ -28,7 +28,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="gae" target="1.5" />
+      <module name="gae" target="1.7" />
       <module name="parse" target="1.5" />
     </bytecodeTargetLevel>
   </component>

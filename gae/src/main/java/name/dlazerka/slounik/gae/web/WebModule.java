@@ -39,7 +39,6 @@ public class WebModule extends JerseyServletModule {
 
 		// Route all requests through GuiceContainer.
 		serve("/*").with(GuiceContainer.class, getJerseyParams());
-		serve("/_ah/*").with(GuiceContainer.class, getJerseyParams());
 		//serve("/image/blobstore-callback-dev").with(BlobstoreCallbackServlet.class);
 
 		bind(UnhandledExceptionMapper.class);
