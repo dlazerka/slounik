@@ -1,9 +1,11 @@
 package name.dlazerka.slounik.gae.rest;
 
+import com.google.appengine.api.modules.ModulesException;
 import com.google.appengine.api.modules.ModulesService;
 import com.google.appengine.api.modules.ModulesServiceFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Stopwatch;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 
 import static com.google.appengine.api.taskqueue.TaskOptions.Method.GET;
 
@@ -32,8 +35,12 @@ public class QueueResource {
 	@GET
 	@Path("schedule")
 	public String get() {
-
-		String instanceId = modulesService.getCurrentInstanceId();
+		String instanceId = "unavailable";
+		try {
+			instanceId = modulesService.getCurrentInstanceId();
+		} catch (ModulesException e) {
+			// ok
+		}
 
 		long now = System.currentTimeMillis();
 
@@ -42,9 +49,10 @@ public class QueueResource {
 				.param("scheduledAt", now + "")
 				.param("instanceId", instanceId)
 				.method(GET);
-		queue.add(taskOptions);
 
-		logger.info("Scheduled");
+		TaskHandle taskHandle = queue.add(taskOptions);
+
+		logger.info("Scheduled " + taskHandle.getName() + ", eta: " + taskHandle.getEtaMillis());
 
 		return "ok";
 	}
@@ -52,8 +60,8 @@ public class QueueResource {
 	@GET
 	@Path("execute")
 	public String execute(
-			@FormParam("scheduledAt") String scheduledAt,
-			@FormParam("instanceId") String instanceId
+			@QueryParam("scheduledAt") String scheduledAt,
+			@QueryParam("instanceId") String instanceId
 	) {
 		long now = System.currentTimeMillis();
 		long scheduled = Long.parseLong(scheduledAt);
