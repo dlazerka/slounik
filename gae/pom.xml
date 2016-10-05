@@ -129,6 +129,15 @@
 			<version>1.10.19</version>
 			<scope>test</scope>
 		</dependency>
+
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.2</version>
+		</dependency>
+
+
 		<!--
 		  GAE libraries for local testing as described here:
 		  http://code.google.com/appengine/docs/java/howto/unittesting.html
