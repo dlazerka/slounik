@@ -13,10 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 
 import java.util.List;
 
@@ -27,6 +24,7 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
  * @author Dzmitry Lazerka
  */
 @Path("/queue")
+@Produces("text/plain")
 public class QueueResource {
 	private static final Logger logger = LoggerFactory.getLogger(QueueResource.class);
 
@@ -34,6 +32,7 @@ public class QueueResource {
 	static ModulesService modulesService = ModulesServiceFactory.getModulesService();
 
 	static DescriptiveStatistics instanceStat = new DescriptiveStatistics();
+
 	@GET
 	@Path("schedule")
 	public String get() {
@@ -122,17 +121,17 @@ public class QueueResource {
 	}
 
 	private String getSummary(DescriptiveStatistics stat) {
-		return "n: " + (long) Math.round(stat.getN()) +
-		", min: " + Math.round(stat.getMin()) +
-		", max: " + Math.round(stat.getMax()) +
-		", mean: " + Math.round(stat.getMean()) +
-		", var: " + Math.round(stat.getVariance()) +
-		", p50: " + stat.getPercentile(50) +
-		", p90: " + stat.getPercentile(90) +
-		", p95: " + stat.getPercentile(95) +
-		", p98: " + stat.getPercentile(98) +
-		", p99: " + stat.getPercentile(99) +
-		", p99.9: " + stat.getPercentile(99.9) +
-		", instanceId: " + getInstanceId();
+		return " n: " + (long) Math.round(stat.getN()) +
+		"\n min: "   + Math.round(stat.getMin()) + "ms " +
+		"\n max: "   + Math.round(stat.getMax()) + "ms " +
+		"\n mean: "  + Math.round(stat.getMean()) + "ms " +
+		"\n var: "   + Math.round(stat.getVariance()) +
+		"\n p50: "   + Math.round(stat.getPercentile(50)) + "ms " +
+		"\n p90: "   + Math.round(stat.getPercentile(90)) + "ms " +
+		"\n p95: "   + Math.round(stat.getPercentile(95)) + "ms " +
+		"\n p98: "   + Math.round(stat.getPercentile(98)) + "ms " +
+		"\n p99: "   + Math.round(stat.getPercentile(99)) + "ms " +
+		"\n p99.9: " + Math.round(stat.getPercentile(99.9)) + "ms "  +
+		"\n instanceId: " + getInstanceId();
 	}
 }
