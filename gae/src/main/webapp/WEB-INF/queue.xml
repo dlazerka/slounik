@@ -13,5 +13,20 @@
 			<max-doublings>2</max-doublings>
 		</retry-parameters>
 	</queue>
-	 -->
+-->
+	<queue>
+		<name>test</name>
+		<rate>10/s</rate>
+		<bucket-size>50</bucket-size>
+
+<!--
+		<retry-parameters>
+			<task-retry-limit>3</task-retry-limit>
+			<task-age-limit>2h</task-age-limit>
+			<min-backoff-seconds>10</min-backoff-seconds>
+			<max-backoff-seconds>200</max-backoff-seconds>
+			<max-doublings>2</max-doublings>
+		</retry-parameters>
+-->
+	</queue>
 </queue-entries>

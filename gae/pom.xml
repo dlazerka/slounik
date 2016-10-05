@@ -133,12 +133,14 @@
 		  GAE libraries for local testing as described here:
 		  http://code.google.com/appengine/docs/java/howto/unittesting.html
 		-->
-<!--		<dependency>
+		<!--
+		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-labs</artifactId>
 			<version>${gae.version}</version>
 			<scope>test</scope>
-		</dependency>-->
+		</dependency>
+		-->
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-stubs</artifactId>
@@ -154,7 +156,7 @@
 	</dependencies>
 
 	<build>
-		<defaultGoal>package</defaultGoal>
+		<defaultGoal>war:exploded</defaultGoal>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -165,7 +167,35 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>com.google.appengine</groupId>
+				<artifactId>appengine-maven-plugin</artifactId>
+				<version>${gae.version}</version>
+				<configuration>
+					<enableJarSplitting>true</enableJarSplitting>
+					<enableJarClasses>false</enableJarClasses>
+					<port>8580</port>
+					<address>0.0.0.0</address>
+					<jvmFlags>
+						<!--<jvmFlag>-Dappengine.generated.dir=${basedir}/tmp</jvmFlag>-->
+						<jvmFlag>-Ddatastore.backing_store=${basedir}/local_db.bin</jvmFlag>
+						<jvmFlag>-Xdebug</jvmFlag>
+						<jvmFlag>-agentlib:jdwp=transport=dt_socket,address=8001,server=y,suspend=n</jvmFlag>
+						<jvmFlag>-Djava.util.logging.SimpleFormatter.format=%1$tT %2$s: %5$s%6$s%n</jvmFlag>
+					</jvmFlags>
+					<noCookies>true</noCookies>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<archiveClasses>true</archiveClasses>
+				</configuration>
+			</plugin>
 		</plugins>
+
 	</build>
 
 </project>

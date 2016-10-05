@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
 	<application>lazerka-slounik</application>
-	<version>23-update</version>
+	<version>24-warmup</version>
 
 	<!-- Configure serving/caching of GWT files -->
 	<static-files>
@@ -26,10 +26,14 @@
 	<!-- Commented because Eclipse Google Plugin does not understand -->
 	<threadsafe>true</threadsafe>
 
-<!--
+	<warmup-requests-enabled>true</warmup-requests-enabled>
+	<inbound-services>
+		<service>warmup</service>
+	</inbound-services>
+
 	<automatic-scaling>
 		<min-idle-instances>1</min-idle-instances>
+		<max-concurrent-requests>20</max-concurrent-requests>
 	</automatic-scaling>
--->
 
 </appengine-web-app>

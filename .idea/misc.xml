@@ -7,6 +7,9 @@
       <item index="1" class="java.lang.String" itemvalue="com.fasterxml.jackson.annotation.JsonProperty" />
     </list>
   </component>
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="appengine-java" url="file://$PROJECT_DIR$/gae" />
+  </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
