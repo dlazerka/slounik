@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
 	<application>lazerka-slounik</application>
-	<version>24-warmup</version>
+	<version>25-tasks-stat</version>
 
 	<!-- Configure serving/caching of GWT files -->
 	<static-files>

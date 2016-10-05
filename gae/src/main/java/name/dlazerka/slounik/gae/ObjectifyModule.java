@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.impl.translate.opt.joda.JodaTimeTranslators;
+import name.dlazerka.slounik.gae.rest.TaskDelay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ public class ObjectifyModule extends AbstractModule {
 
 		factory.register(Entry.class);
 		factory.register(Dictionary.class);
+		factory.register(TaskDelay.class);
 
 		logger.debug("Objectify set up.");
 	}
