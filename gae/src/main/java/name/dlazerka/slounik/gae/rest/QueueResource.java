@@ -52,7 +52,7 @@ public class QueueResource {
 
 		TaskHandle taskHandle = queue.add(taskOptions);
 
-		logger.info("Scheduled " + taskHandle.getName() + ", eta: " + taskHandle.getEtaMillis());
+		logger.info("Scheduled " + taskHandle.getName() + ", at: " + now + ", eta: " + taskHandle.getEtaMillis());
 
 		return "ok";
 	}
@@ -65,9 +65,9 @@ public class QueueResource {
 	) {
 		long now = System.currentTimeMillis();
 		long scheduled = Long.parseLong(scheduledAt);
-		long took = now - scheduled;
+		long after = now - scheduled;
 
-		stat.addValue(took);
+		stat.addValue(after);
 
 		long mean = Math.round(stat.getMean());
 		long min = Math.round(stat.getMin());
@@ -75,7 +75,8 @@ public class QueueResource {
 		long n = Math.round(stat.getN());
 		long var = Math.round(stat.getVariance());
 
-		logger.info("Executed after: " + took + "ms, " +
+		logger.info("Executed at " + now + ", " +
+				"after: " + after + "ms, " +
 				"min: " + min + ", " +
 				"max: " + max + ", " +
 				"n: " + n + ", " +
