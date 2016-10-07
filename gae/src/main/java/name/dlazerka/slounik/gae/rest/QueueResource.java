@@ -32,8 +32,6 @@ public class QueueResource {
 	static Queue queue = QueueFactory.getQueue("test");
 	static ModulesService modulesService = ModulesServiceFactory.getModulesService();
 
-	static DescriptiveStatistics instanceStat = new DescriptiveStatistics();
-
 	@GET
 	@Path("schedule")
 	public String get() {
@@ -93,12 +91,7 @@ public class QueueResource {
 
 		ofy().save().entity(taskDelay).now();
 
-		instanceStat.addValue(delay);
-
-		logger.debug("Executed at " + now +
-				", delay: " + delay + "ms" +
-				getSummary(instanceStat)
-		);
+		logger.debug("Executed at " + now + ", delay: " + delay + "ms");
 
 		return "ok";
 	}
@@ -110,6 +103,7 @@ public class QueueResource {
 		List<TaskDelay> list = ofy().load().type(TaskDelay.class)
 				.chunk(1000)
 				.list();
+		list.get(0);
 		stopwatch.stop();
 
 		Stopwatch stopwatch2 = Stopwatch.createStarted();
@@ -122,6 +116,32 @@ public class QueueResource {
 				"\n fetched in: " + stopwatch.elapsed(MILLISECONDS) + "ms" +
 				"\n computed in: " + stopwatch2.elapsed(MILLISECONDS) + "ms";
 		logger.info(response);
+
+		return response;
+	}
+
+
+	@GET
+	@Path("/dump")
+	@Produces("text/tsv")
+	public String dump() {
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		List<TaskDelay> list = ofy().load().type(TaskDelay.class)
+				.chunk(1000)
+				.list();
+		list.get(0);
+		stopwatch.stop();
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("delay\n");
+		Stopwatch stopwatch2 = Stopwatch.createStarted();
+		for (TaskDelay taskDelay : list) {
+			sb.append(taskDelay.delay).append('\n');
+		}
+		String response = sb.toString();
+
+		logger.info("Fetched {}rows in: {}ms, computed in: {}ms",
+				list.size(), stopwatch.elapsed(MILLISECONDS), stopwatch2.elapsed(MILLISECONDS));
 
 		return response;
 	}
