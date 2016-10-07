@@ -7,6 +7,7 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.common.base.Stopwatch;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -14,11 +15,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.*;
-
 import java.util.List;
 
 import static com.google.appengine.api.taskqueue.TaskOptions.Method.GET;
 import static com.googlecode.objectify.ObjectifyService.ofy;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * @author Dzmitry Lazerka
@@ -105,16 +106,21 @@ public class QueueResource {
 	@GET
 	@Path("/stat")
 	public String stat() {
+		Stopwatch stopwatch = Stopwatch.createStarted();
 		List<TaskDelay> list = ofy().load().type(TaskDelay.class)
 				.chunk(1000)
 				.list();
+		stopwatch.stop();
 
+		Stopwatch stopwatch2 = Stopwatch.createStarted();
 		DescriptiveStatistics stat = new DescriptiveStatistics();
 		for (TaskDelay taskDelay : list) {
 			stat.addValue(taskDelay.delay);
 		}
 
-		String response = getSummary(stat);
+		String response = getSummary(stat) +
+				"\n fetched in: " + stopwatch.elapsed(MILLISECONDS) + "ms" +
+				"\n computed in: " + stopwatch2.elapsed(MILLISECONDS) + "ms";
 		logger.info(response);
 
 		return response;
