@@ -120,7 +120,13 @@ public class QueueResource {
 		return response;
 	}
 
-
+	/**
+	 * library("ggplot2")
+	 > library("dplyr")
+	 * dmp = tbl_dt(read.csv('dump', header = TRUE))
+	 * ggplot(dmp) + aes(x=dmp$delay) + geom_histogram(bins = 200, origin = 1) +
+	 *      scale_x_log10(breaks=c(20, 30, 50, 75, 100, 150, 200, 500, 1000, 1700))
+	 */
 	@GET
 	@Path("/dump")
 	@Produces("text/tsv")
