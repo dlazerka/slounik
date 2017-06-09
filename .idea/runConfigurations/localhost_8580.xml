@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="localhost:8580" type="GoogleAppEngineDevServer" factoryName="Local" APPLICATION_SERVER_NAME="AppEngine Dev 1.9.42" ALTERNATIVE_JRE_ENABLED="false">
+  <configuration default="false" name="localhost:8580" type="GoogleAppEngineDevServer" factoryName="Local" APPLICATION_SERVER_NAME="AppEngine Dev 1.9.53" ALTERNATIVE_JRE_ENABLED="false">
     <option name="OPEN_IN_BROWSER" value="false" />
     <option name="COMMON_VM_ARGUMENTS" value="-Djava.util.logging.SimpleFormatter.format=&quot;%1$tF %1$tT %4$s %2$s: %5$s%6$s%n&quot; -Dappengine.disableRestrictedCheck=true" />
     <option name="UPDATE_ON_FRAME_DEACTIVATION" value="true" />
